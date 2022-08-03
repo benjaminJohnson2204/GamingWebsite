@@ -1,0 +1,21 @@
+{
+  "env": {
+    "amd": true,
+    "browser": true,
+    "commonjs": true,
+    "es2021": true,
+    "mocha": true,
+    "node": true
+  },
+  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "ecmaVersion": "latest"
+  },
+  "ignorePatterns": ["*.config.js", "node_modules/*", "client/build/*"],
+  "plugins": ["@typescript-eslint", "react"],
+  "rules": {}
+}
