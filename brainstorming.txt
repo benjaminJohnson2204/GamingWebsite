@@ -1,0 +1,43 @@
+Database:
+
+- Game type (e.g. chess, tic-tac-toe, blackjack, dominion):
+    Name
+    Number of players (can be a range)
+
+- User
+    Username
+    Password
+    Friends
+
+- Game
+    type
+    user(s) who played
+    outcome (winner, score, etc)
+
+
+Example: blackjack
+2-players
+Everyone gets a score (cards in hand)
+There is a winner, or a tie
+
+Example: dominion
+2-4 players
+Everyone has a score (number of victory points)
+there is a winner, or a tie
+
+Example: chess
+2 players
+Store the final board state, and all moves made
+There is a winner, or it's a draw
+
+Example: tetris
+1 player
+Store the final score, and final board state
+
+
+Sockets manage rooms, with different namespaces for different games. 
+Put users in rooms based on the ID of their game
+Messages are moves from users (must decide if moves are valid), and emit game updates to users
+Store game states in an object (different object for each type of game), with keys being game IDs
+
+You can play private games with your friends, or join a random game against anyone else
