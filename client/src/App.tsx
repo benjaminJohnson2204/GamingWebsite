@@ -1,28 +1,29 @@
-import { io, Socket } from "socket.io-client";
-import logo from "./logo.svg";
 import "./App.css";
-import { ServerToClientEvents, ClientToServerEvents } from "../../server/gameHandlers/types";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { CookiesProvider } from "react-cookie";
 
-const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io("/tic-tac-toe");
+import HomePage from "./pages/HomePage";
+import EnsureAuthenticated from "./components/EnsureAuthenticated";
+import FriendsPage from "./pages/FriendsPage";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import NotFoundPage from "./pages/NotFoundPage";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <CookiesProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+
+          <Route path="/friends" element={<EnsureAuthenticated page={<FriendsPage />} />} />
+
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </BrowserRouter>
+    </CookiesProvider>
   );
 }
 

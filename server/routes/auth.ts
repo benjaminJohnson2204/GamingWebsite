@@ -19,7 +19,7 @@ router.get("/user", ensureAuthenticated, (req: Request, res: Response) => {
 router.post(
   "/register",
   async (req: Request, res: Response, next: Function) => {
-    if (req.body.password != req.body.confirm) {
+    if (req.body.password != req.body.confirmation) {
       return res.status(400).json({ error: "passwords don't match" });
     }
     const hash = bcrypt.hashSync(req.body.password, 12);
@@ -52,5 +52,19 @@ router.post(
     res.status(200).json("Successfully logged in");
   }
 );
+
+router.get("/logout", (req: Request, res: Response) => {
+  req.logout({}, (error) => {
+    if (error) {
+      res.status(500).json({ error: "Could not logout" });
+    } else {
+      res.status(200).json("Successfully logged out");
+    }
+  });
+});
+
+router.get("/invalid", (req: Request, res: Response) => {
+  return res.status(401).json({ error: "Not authenticated" });
+});
 
 export { router, ensureAuthenticated };
