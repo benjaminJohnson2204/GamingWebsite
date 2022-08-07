@@ -34,7 +34,13 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents, InterServerEve
   server
 );
 
-mongoose.connect(process.env.MONGO_URI!);
+export const connectToMongoose = async () => {
+  await mongoose.connect(process.env.MONGO_URI!);
+};
+
+if (process.env.TEST_ENV?.trim() !== "TRUE") {
+  connectToMongoose(); // Need to delay connecting for tests because those change the Mongo URI
+}
 
 app.use(express.static(path.resolve(__dirname, "../../client/build")));
 
@@ -91,3 +97,5 @@ io.of("/tic-tac-toe").on("connection", (socket: Socket) => {
 server.listen(port, () => {
   console.log(`Server is listening on port ${port}`);
 });
+
+export default app;

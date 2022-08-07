@@ -19,7 +19,7 @@ router.get("/user", ensureAuthenticated, (req: Request, res: Response) => {
 router.post(
   "/register",
   async (req: Request, res: Response, next: Function) => {
-    if (req.body.password != req.body.confirmation) {
+    if (req.body.password !== req.body.confirmation) {
       return res.status(400).json({ error: "passwords don't match" });
     }
     const hash = bcrypt.hashSync(req.body.password, 12);
@@ -41,24 +41,42 @@ router.post(
   },
   passport.authenticate("local"),
   (req: Request, res: Response) => {
-    res.status(200).json("Successfully registered");
+    res.status(201).json("Successfully registered");
   }
 );
 
 router.post(
   "/login",
   passport.authenticate("local", { failureRedirect: "/auth/invalid" }),
-  (req: Request, res: Response) => {
+  async (req: Request, res: Response) => {
     res.status(200).json("Successfully logged in");
   }
 );
 
-router.get("/logout", (req: Request, res: Response) => {
+/**
+ * Logout of site
+ */
+router.post("/logout", (req: Request, res: Response) => {
   req.logout({}, (error) => {
     if (error) {
       res.status(500).json({ error: "Could not logout" });
     } else {
       res.status(200).json("Successfully logged out");
+    }
+  });
+});
+
+/**
+ * Delete account (mainly used for cleanup of tests)
+ * Also logs out to avoid errors from being logged in to a nonexistent account
+ */
+router.delete("/delete", async (req: Request, res: Response) => {
+  await User.deleteOne({ _id: (req.user as IUser)._id });
+  req.logout({}, (error) => {
+    if (error) {
+      res.status(500).json({ error: "Could not delete account" });
+    } else {
+      res.status(200).json("Successfully deleted account");
     }
   });
 });

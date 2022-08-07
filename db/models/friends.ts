@@ -14,11 +14,11 @@ const Friendship = mongoose.model<IFriendship>("Friendship", friendshipSchema);
 
 interface IFriendRequest extends IDocument {
   requestingUser: mongoose.Types.ObjectId;
-  receivingUser: mongoose.Types.ObjectId;
+  requestedUser: mongoose.Types.ObjectId;
 }
 const friendRequestSchema = new mongoose.Schema<IFriendRequest>({
   requestingUser: { type: ObjectId, ref: User },
-  receivingUser: { type: ObjectId, ref: User },
+  requestedUser: { type: ObjectId, ref: User },
 });
 const FriendRequest = mongoose.model<IFriendRequest>("FriendRequest", friendRequestSchema);
 
