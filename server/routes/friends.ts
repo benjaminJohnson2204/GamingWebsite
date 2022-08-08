@@ -28,6 +28,21 @@ router.get("/search", async (req: Request, res: Response) => {
  * Req.body contains userId, the ID of the user to make a request to
  */
 router.post("/request", async (req: Request, res: Response) => {
+  const existingFriendship: IFriendship | null = await Friendship.findOne({
+    userIds: { $all: [(req.user as IUser)._id, req.body.userId] },
+  });
+  if (existingFriendship) {
+    return res.status(400).json({ error: "You are already friends with that user" });
+  }
+
+  const existingRequest: IFriendRequest | null = await FriendRequest.findOne({
+    requestingUser: (req.user as IUser)._id,
+    requestedUser: req.body.userId,
+  });
+  if (existingRequest) {
+    return res.status(400).json({ error: "You have already sent a friend request to that user" });
+  }
+
   const request: IFriendRequest = await FriendRequest.create({
     requestingUser: (req.user as IUser)._id,
     requestedUser: req.body.userId,
@@ -42,9 +57,12 @@ router.post("/request", async (req: Request, res: Response) => {
  *  View all incoming friend requests
  */
 router.get("/request/incoming", async (req: Request, res: Response) => {
-  const requestingUserIds: IFriendRequest[] = await FriendRequest.find({
-    requestedUser: (req.user as IUser)._id,
-  }).select("requestingUser");
+  const requestingUserIds: mongoose.Types.ObjectId[] = (
+    await FriendRequest.find({
+      requestedUser: (req.user as IUser)._id,
+    })
+  ).map((doc) => doc.requestingUser);
+
   const requestingUsers = await User.find({
     _id: requestingUserIds,
   });
@@ -56,12 +74,9 @@ router.get("/request/incoming", async (req: Request, res: Response) => {
  */
 router.get("/request/outgoing", async (req: Request, res: Response) => {
   const requestedUserIds: mongoose.Types.ObjectId[] = (
-    await FriendRequest.find(
-      {
-        requestingUser: (req.user as IUser)._id,
-      },
-      { requestedUser: 1, _id: 0 }
-    )
+    await FriendRequest.find({
+      requestingUser: (req.user as IUser)._id,
+    })
   ).map((doc) => doc.requestedUser);
 
   const requestedUsers = await User.find({
@@ -89,7 +104,7 @@ router.post("/accept", async (req: Request, res: Response) => {
     return res.status(500).json({ error: "Cannot add friend" });
   }
   await FriendRequest.deleteOne({ _id: request._id });
-  return res.status(204);
+  return res.status(200).json({ result: "Successfully accepted friend request" });
 });
 
 /**
@@ -129,13 +144,15 @@ router.post("/cancel", async (req: Request, res: Response) => {
  */
 router.get("/all", async (req: Request, res: Response) => {
   // Find all friendships involving this user
-  const friendIds = await Friendship.find({
-    userIds: (req.user as IUser)._id,
-  }).select("userIds");
+  const friendIds: mongoose.Types.ObjectId[] = (
+    await Friendship.find({
+      userIds: (req.user as IUser)._id,
+    })
+  ).map((doc) => doc.userIds.filter((_id) => _id !== (req.user as IUser)._id)[0]);
 
   // Find all users involved in those friendships, excluding this user themself
   const friends: IUser[] = await User.find({
-    _id: { $ne: (req.user as IUser)._id, $in: friendIds },
+    _id: { $in: friendIds },
   });
   return res.status(200).json({ friends: friends });
 });
@@ -150,7 +167,7 @@ router.post("/remove", async (req: Request, res: Response) => {
       $all: [(req.user as IUser)._id, req.body.userId],
     },
   });
-  return res.status(204);
+  return res.status(200).json({ result: "Successfully removed friend" });
 });
 
 export { router };
