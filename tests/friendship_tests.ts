@@ -13,25 +13,27 @@ chai.use(chaiHttp);
 
 dotenv.config({ path: ".env" });
 
-var agent: ChaiHttp.Agent;
+var agent1: ChaiHttp.Agent;
+var agent2: ChaiHttp.Agent;
 var user1: IUser;
 var user2: IUser;
 
 describe("Friendship Tests", () => {
   before(async () => {
-    agent = chai.request.agent(app);
+    agent1 = chai.request.agent(app);
+    agent2 = chai.request.agent(app);
     user1 = await User.create({ username: "Test1", password: bcrypt.hashSync("123", 12) });
     user2 = await User.create({ username: "Test2", password: bcrypt.hashSync("123", 12) });
-    const users = await User.find({});
   });
 
   after(() => {
     mongoUnit.drop();
-    agent.close();
+    agent1.close();
+    agent2.close();
   });
 
-  it("Login as user 1", (done) => {
-    agent
+  it("Login agents", (done) => {
+    agent1
       .post("/auth/login")
       .send({
         username: "Test1",
@@ -41,18 +43,29 @@ describe("Friendship Tests", () => {
         assert.isNull(err);
         assert.equal(res.status, 200);
         expect(res).to.have.cookie("connect.sid");
-        done();
+        agent2
+          .post("/auth/login")
+          .send({
+            username: "Test2",
+            password: "123",
+          })
+          .end((err, res) => {
+            assert.isNull(err);
+            assert.equal(res.status, 200);
+            expect(res).to.have.cookie("connect.sid");
+            done();
+          });
       });
   });
 
   it("Search users", (done) => {
-    agent.get("/friend/search?search=teST").end((err, res) => {
+    agent1.get("/friend/search?search=teST").end((err, res) => {
       assert.isNull(err);
       assert.equal(res.status, 200);
       const results = JSON.parse(res.text).users;
       assert.equal(results.length, 1);
       assert.equal(results[0].user._id, user2._id);
-      agent.get("/friend/search?search=st1").end((err, res) => {
+      agent1.get("/friend/search?search=st1").end((err, res) => {
         assert.isNull(err);
         assert.equal(res.status, 200);
         const results = JSON.parse(res.text).users;
@@ -63,7 +76,7 @@ describe("Friendship Tests", () => {
   });
 
   it("Send a friend request to user 2", (done) => {
-    agent
+    agent1
       .post("/friend/request")
       .send({
         userId: user2._id,
@@ -78,7 +91,7 @@ describe("Friendship Tests", () => {
   });
 
   it("Search users", (done) => {
-    agent.get("/friend/search?search=teST").end((err, res) => {
+    agent1.get("/friend/search?search=teST").end((err, res) => {
       assert.isNull(err);
       assert.equal(res.status, 200);
       const results = JSON.parse(res.text).users;
@@ -90,7 +103,7 @@ describe("Friendship Tests", () => {
   });
 
   it("Send duplicate request", (done) => {
-    agent
+    agent1
       .post("/friend/request")
       .send({
         userId: user2._id,
@@ -103,7 +116,7 @@ describe("Friendship Tests", () => {
   });
 
   it("View outgoing request", (done) => {
-    agent.get("/friend/request/outgoing").end((err, res) => {
+    agent1.get("/friend/request/outgoing").end((err, res) => {
       assert.isNull(err);
       assert.equal(res.status, 200);
       assert.equal(JSON.parse(res.text).requestedUsers.length, 1);
@@ -113,13 +126,13 @@ describe("Friendship Tests", () => {
   });
 
   it("Cancel existing request", (done) => {
-    agent
+    agent1
       .post("/friend/cancel")
       .send({ userId: user2._id })
       .end((err, res) => {
         assert.isNull(err);
         assert.equal(res.status, 200);
-        agent.get("/friend/request/outgoing").end((err, res) => {
+        agent1.get("/friend/request/outgoing").end((err, res) => {
           assert.isNull(err);
           assert.equal(res.status, 200);
           assert.equal(JSON.parse(res.text).requestedUsers.length, 0);
@@ -129,7 +142,7 @@ describe("Friendship Tests", () => {
   });
 
   it("Cancel nonexistent request", (done) => {
-    agent
+    agent1
       .post("/friend/cancel")
       .send({ userId: user2._id })
       .end((err, res) => {
@@ -140,7 +153,7 @@ describe("Friendship Tests", () => {
   });
 
   it("Re-send friend request", (done) => {
-    agent
+    agent1
       .post("/friend/request")
       .send({
         userId: user2._id,
@@ -152,23 +165,8 @@ describe("Friendship Tests", () => {
       });
   });
 
-  it("Login as user 2", (done) => {
-    agent
-      .post("/auth/login")
-      .send({
-        username: "Test2",
-        password: "123",
-      })
-      .end((err, res) => {
-        assert.isNull(err);
-        assert.equal(res.status, 200);
-        expect(res).to.have.cookie("connect.sid");
-        done();
-      });
-  });
-
   it("View incoming request", (done) => {
-    agent.get("/friend/request/incoming").end((err, res) => {
+    agent2.get("/friend/request/incoming").end((err, res) => {
       assert.isNull(err);
       assert.equal(res.status, 200);
       assert.equal(JSON.parse(res.text).requestingUsers.length, 1);
@@ -178,7 +176,7 @@ describe("Friendship Tests", () => {
   });
 
   it("Decline request", (done) => {
-    agent
+    agent2
       .post("/friend/decline")
       .send({ userId: user1._id })
       .end((err, res) => {
@@ -189,7 +187,7 @@ describe("Friendship Tests", () => {
   });
 
   it("Decline nonexistent request", (done) => {
-    agent
+    agent2
       .post("/friend/decline")
       .send({ userId: user1._id })
       .end((err, res) => {
@@ -200,7 +198,7 @@ describe("Friendship Tests", () => {
   });
 
   it("Send a friend request to user 1", (done) => {
-    agent
+    agent2
       .post("/friend/request")
       .send({
         userId: user1._id,
@@ -214,23 +212,8 @@ describe("Friendship Tests", () => {
       });
   });
 
-  it("Login as user 1", (done) => {
-    agent
-      .post("/auth/login")
-      .send({
-        username: "Test1",
-        password: "123",
-      })
-      .end((err, res) => {
-        assert.isNull(err);
-        assert.equal(res.status, 200);
-        expect(res).to.have.cookie("connect.sid");
-        done();
-      });
-  });
-
   it("Accept request", (done) => {
-    agent
+    agent1
       .post("/friend/accept")
       .send({ userId: user2._id })
       .end((err, res) => {
@@ -241,7 +224,7 @@ describe("Friendship Tests", () => {
   });
 
   it("Accept nonexistent request", (done) => {
-    agent
+    agent1
       .post("/friend/accept")
       .send({ userId: user2._id })
       .end((err, res) => {
@@ -252,7 +235,7 @@ describe("Friendship Tests", () => {
   });
 
   it("View all friends", (done) => {
-    agent.get("/friend/all").end((err, res) => {
+    agent1.get("/friend/all").end((err, res) => {
       assert.isNull(err);
       assert.equal(res.status, 200);
       assert.equal(JSON.parse(res.text).friends.length, 1);
@@ -262,7 +245,7 @@ describe("Friendship Tests", () => {
   });
 
   it("Remove user 2 as a friend", (done) => {
-    agent
+    agent1
       .post("/friend/remove")
       .send({ userId: user2._id })
       .end((err, res) => {
@@ -273,7 +256,7 @@ describe("Friendship Tests", () => {
   });
 
   it("View all friends", (done) => {
-    agent.get("/friend/all").end((err, res) => {
+    agent1.get("/friend/all").end((err, res) => {
       assert.isNull(err);
       assert.equal(res.status, 200);
       assert.equal(JSON.parse(res.text).friends.length, 0);
