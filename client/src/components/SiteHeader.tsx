@@ -40,7 +40,10 @@ export default function SiteHeader(props: { isAuthenticated: boolean }) {
                 <NavDropdown.Item href="/profile">Profile</NavDropdown.Item>
                 <NavDropdown.Item href="/friends">Friends</NavDropdown.Item>
                 <NavDropdown.Divider />
-                <NavDropdown.Item href={location.pathname} onClick={() => fetch("/auth/logout")}>
+                <NavDropdown.Item
+                  href={location.pathname}
+                  onClick={() => fetch("/auth/logout", { method: "POST", credentials: "include" })}
+                >
                   Logout
                 </NavDropdown.Item>
               </NavDropdown>

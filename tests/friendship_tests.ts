@@ -51,7 +51,7 @@ describe("Friendship Tests", () => {
       assert.equal(res.status, 200);
       const results = JSON.parse(res.text).users;
       assert.equal(results.length, 1);
-      assert.equal(results[0]._id, user2._id);
+      assert.equal(results[0].user._id, user2._id);
       agent.get("/friend/search?search=st1").end((err, res) => {
         assert.isNull(err);
         assert.equal(res.status, 200);
@@ -75,6 +75,18 @@ describe("Friendship Tests", () => {
         assert.equal(JSON.parse(res.text).request.requestedUser, user2._id);
         done();
       });
+  });
+
+  it("Search users", (done) => {
+    agent.get("/friend/search?search=teST").end((err, res) => {
+      assert.isNull(err);
+      assert.equal(res.status, 200);
+      const results = JSON.parse(res.text).users;
+      assert.equal(results.length, 1);
+      assert.equal(results[0].user._id, user2._id);
+      assert.equal(results[0].requested, true);
+      done();
+    });
   });
 
   it("Send duplicate request", (done) => {
@@ -244,15 +256,15 @@ describe("Friendship Tests", () => {
       assert.isNull(err);
       assert.equal(res.status, 200);
       assert.equal(JSON.parse(res.text).friends.length, 1);
-      assert.equal(JSON.parse(res.text).friends[0]._id, user1._id);
+      assert.equal(JSON.parse(res.text).friends[0]._id, user2._id);
       done();
     });
   });
 
-  it("Remove user 1 as a friend", (done) => {
+  it("Remove user 2 as a friend", (done) => {
     agent
       .post("/friend/remove")
-      .send({ userId: user1._id })
+      .send({ userId: user2._id })
       .end((err, res) => {
         assert.isNull(err);
         assert.equal(res.status, 200);

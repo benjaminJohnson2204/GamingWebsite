@@ -5,12 +5,20 @@ import SiteHeader from "../components/SiteHeader";
 import { IUser } from "../../../db/models/user";
 import mongoose from "mongoose";
 
+export interface IUserSearchData {
+  user: IUser;
+  friends: boolean;
+  requested: boolean;
+  requesting: boolean;
+}
+
 export default function FriendsPage() {
   const [incomingRequests, setIncomingRequests] = useState<IUser[]>([]);
   const [outgoingRequests, setOutgoingRequests] = useState<IUser[]>([]);
   const [friends, setFriends] = useState<IUser[]>([]);
   const [search, setSearch] = useState("");
-  const [users, setUsers] = useState<IUser[]>([]);
+  const [users, setUsers] = useState<IUserSearchData[]>([]);
+  const [reloadFriends, setReloadFriends] = useState(0);
 
   useEffect(() => {
     fetch("/friend/request/incoming")
@@ -22,13 +30,15 @@ export default function FriendsPage() {
     fetch("/friend/all")
       .then((res) => res.json())
       .then((data) => setFriends(data.friends));
-  }, []);
+  }, [reloadFriends]);
 
   useEffect(() => {
-    fetch(`/friend/search?search=${search}`)
-      .then((res) => res.json())
-      .then((data) => setUsers(data.users));
-  }, [search]);
+    if (search) {
+      fetch(`/friend/search?search=${search}`)
+        .then((res) => res.json())
+        .then((data) => setUsers(data.users));
+    }
+  }, [search, reloadFriends]);
 
   const searchForUser = (event: React.ChangeEvent<any>) => {
     event.preventDefault();
@@ -43,7 +53,7 @@ export default function FriendsPage() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ userId: id }),
-    }).then((res) => {});
+    }).then((res) => setReloadFriends(reloadFriends + 1));
   };
 
   const removeFriend = (id: mongoose.Types.ObjectId) => {
@@ -54,7 +64,7 @@ export default function FriendsPage() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ userId: id }),
-    }).then((res) => {});
+    }).then((res) => setReloadFriends(reloadFriends + 1));
   };
 
   const acceptFriendRequest = (id: mongoose.Types.ObjectId) => {
@@ -65,7 +75,7 @@ export default function FriendsPage() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ userId: id }),
-    });
+    }).then((res) => setReloadFriends(reloadFriends + 1));
   };
 
   const declineFriendRequest = (id: mongoose.Types.ObjectId) => {
@@ -76,7 +86,7 @@ export default function FriendsPage() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ userId: id }),
-    });
+    }).then((res) => setReloadFriends(reloadFriends + 1));
   };
 
   const cancelFriendRequest = (id: mongoose.Types.ObjectId) => {
@@ -87,7 +97,7 @@ export default function FriendsPage() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ userId: id }),
-    });
+    }).then((res) => setReloadFriends(reloadFriends + 1));
   };
 
   return (
@@ -111,6 +121,11 @@ export default function FriendsPage() {
                   </Col>
                 </Row>
               ))}
+              {friends.length === 0 && (
+                <Row>
+                  <Col>You don't have any friends yet</Col>
+                </Row>
+              )}
             </Col>
 
             <Col xs={12} md={6}>
@@ -130,6 +145,11 @@ export default function FriendsPage() {
                         </Button>
                       </Row>
                     ))}
+                    {incomingRequests.length === 0 && (
+                      <Row>
+                        <Col>No incoming requests</Col>
+                      </Row>
+                    )}
                   </Col>
 
                   <Col>
@@ -142,6 +162,11 @@ export default function FriendsPage() {
                         </Button>
                       </Row>
                     ))}
+                    {outgoingRequests.length === 0 && (
+                      <Row>
+                        <Col>No outgoing requests</Col>
+                      </Row>
+                    )}
                   </Col>
                 </Row>
 
@@ -161,12 +186,49 @@ export default function FriendsPage() {
                 <Container fluid>
                   {users.map((user) => (
                     <Row>
-                      <Col>{user.username}</Col>
-                      <Col>
-                        <Button onClick={() => addFriend(user._id)}>Add</Button>
-                      </Col>
+                      <Col>{user.user.username}</Col>
+                      {user.friends ? (
+                        <>
+                          <Col>
+                            <Button>Challenge</Button>
+                          </Col>
+                          <Col>
+                            <Button onClick={() => removeFriend(user.user._id)} variant="danger">
+                              Remove
+                            </Button>
+                          </Col>
+                        </>
+                      ) : user.requested ? (
+                        <Button onClick={() => cancelFriendRequest(user.user._id)} variant="danger">
+                          Cancel
+                        </Button>
+                      ) : user.requesting ? (
+                        <>
+                          <Button
+                            onClick={() => acceptFriendRequest(user.user._id)}
+                            variant="success"
+                          >
+                            Accept
+                          </Button>
+                          <Button
+                            onClick={() => declineFriendRequest(user.user._id)}
+                            variant="danger"
+                          >
+                            Decline
+                          </Button>
+                        </>
+                      ) : (
+                        <Col>
+                          <Button onClick={() => addFriend(user.user._id)}>Add</Button>
+                        </Col>
+                      )}
                     </Row>
                   ))}
+                  {users.length === 0 && search && (
+                    <Row>
+                      <Col>No search results found</Col>
+                    </Row>
+                  )}
                 </Container>
               </>
             </Col>

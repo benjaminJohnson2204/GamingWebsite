@@ -20,7 +20,28 @@ router.get("/search", async (req: Request, res: Response) => {
       $options: "i",
     },
   });
-  return res.status(200).json({ users: users });
+  const userData = [];
+  for (let user of users) {
+    const data: any = { user: user };
+    const friendship: IFriendship | null = await Friendship.findOne({
+      userIds: { $all: [(req.user as IUser)._id, user._id] },
+    });
+    data["friends"] = friendship !== null;
+
+    const requested: IFriendRequest | null = await FriendRequest.findOne({
+      requestingUser: (req.user as IUser)._id,
+      requestedUser: user._id,
+    });
+    data["requested"] = requested !== null;
+
+    const requesting: IFriendRequest | null = await FriendRequest.findOne({
+      requestingUser: user._id,
+      requestedUser: (req.user as IUser)._id,
+    });
+    data["requesting"] = requesting !== null;
+    userData.push(data);
+  }
+  return res.status(200).json({ users: userData });
 });
 
 /**
@@ -148,7 +169,7 @@ router.get("/all", async (req: Request, res: Response) => {
     await Friendship.find({
       userIds: (req.user as IUser)._id,
     })
-  ).map((doc) => doc.userIds.filter((_id) => _id !== (req.user as IUser)._id)[0]);
+  ).map((doc) => doc.userIds.filter((_id) => !_id.equals((req.user as IUser)._id))[0]);
 
   // Find all users involved in those friendships, excluding this user themself
   const friends: IUser[] = await User.find({
