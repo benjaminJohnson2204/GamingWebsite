@@ -5,13 +5,12 @@ import { RoomHandlerParameters } from "./types";
 module.exports = ({
   socket,
   io,
+  waitingRandomUsers,
+  waitingPrivateUsers,
+  inProgressGames,
   socketNamespace,
   gameTypeId,
-  inProgressGames,
 }: RoomHandlerParameters) => {
-  const waitingRandomUsers = new Set<string>();
-  const waitingPrivateUsers = new Map<string, string>(); // Keys are creators, values are opponents
-
   socket.on("joinRandomGame", async (userId) => {
     if (waitingRandomUsers.size > 0) {
       // Get first user (one who has been waiting the longest)
@@ -29,14 +28,12 @@ module.exports = ({
     } else {
       waitingRandomUsers.add(userId);
       socket.join(userId);
-      socket.emit("waiting for opponent", {});
     }
   });
 
   socket.on("createPrivateGame", (userId, opponentId) => {
     waitingPrivateUsers.set(userId, opponentId);
     socket.join(userId);
-    socket.emit("waiting for opponent", {});
   });
 
   socket.on("joinPrivateGame", async (userId, userToJoin) => {

@@ -3,7 +3,7 @@ import { Game, IGame } from "../../db/models/game";
 import { GameType } from "../../db/models/gameType";
 import { GameHandlerParameters } from "./types";
 
-interface TicTacToeGame extends IGame {
+export interface TicTacToeGame extends IGame {
   squares: String[][]; // Store squares as empty strings, "X", or "O"
   xPlayer: ObjectId;
   turn: String; // "X" or "O"
@@ -57,28 +57,29 @@ const checkForTie = (game: TicTacToeGame) => {
   return true;
 };
 
-module.exports = ({ socket, io, socketNamespace }: GameHandlerParameters) => {
-  const inProgressGames = new Map();
+module.exports = ({
+  socket,
+  io,
+  waitingRandomUsers,
+  waitingPrivateUsers,
+  inProgressGames,
+  socketNamespace,
+}: GameHandlerParameters) => {
+  const gameTypeId = "62ecb1695918d6b6bab9f988";
 
-  // Find ID of tic-tac-toe game type
-  var ticTacToeId;
-  (async () => {
-    ticTacToeId = await GameType.findOne({ name: "Tic-Tac-Toe" });
-    if (!ticTacToeId) {
-      ticTacToeId = await GameType.create({
-        name: "Tic-Tac-Toe",
-        description: "First player to claim three boxes in a row wins!",
-        numPlayers: 2,
-      });
-    }
-    ticTacToeId = ticTacToeId._id;
+  require("./handleRooms")({
+    socket,
+    io,
+    waitingRandomUsers,
+    waitingPrivateUsers,
+    inProgressGames,
+    socketNamespace,
+    gameTypeId,
+  });
 
-    require("./handleRooms")({ socket, io, socketNamespace, ticTacToeId, inProgressGames });
-  })();
-
-  socket.on("joinRoom", (message) => {
-    socket.join(message.gameId);
-    const game = inProgressGames.get(message.gameId);
+  socket.on("joinRoom", (gameId) => {
+    socket.join(gameId);
+    const game = inProgressGames.get(gameId) as TicTacToeGame;
     game.squares = [
       ["", "", ""],
       ["", "", ""],
@@ -88,16 +89,16 @@ module.exports = ({ socket, io, socketNamespace }: GameHandlerParameters) => {
     game.turn = "X";
   });
 
-  socket.on("move", (message) => {
-    const game = inProgressGames.get(message.gameId);
-    const playersLetter = message.userId === game.xPlayer ? "X" : "O";
+  socket.on("move", (gameId, userId, row, col) => {
+    const game = inProgressGames.get(gameId) as TicTacToeGame;
+    const playersLetter = userId === game.xPlayer ? "X" : "O";
 
     // Ensure that it's this user's turn and the square is available
-    if (playersLetter !== game.turn || game.squares[message.row][message.col]) {
+    if (playersLetter !== game.turn || game.squares[row][col]) {
       return;
     }
 
-    game.squares[message.row][message.col] = playersLetter;
+    game.squares[row][col] = playersLetter;
     const winner = checkForWinner(game);
     if (winner) {
       game.winner =
@@ -110,6 +111,6 @@ module.exports = ({ socket, io, socketNamespace }: GameHandlerParameters) => {
     } else {
       switchTurns(game);
     }
-    io.of(socketNamespace).to(game._id).emit("gameUpdate", game);
+    io.of(socketNamespace).to(game._id.toString()).emit("gameUpdate", game);
   });
 };

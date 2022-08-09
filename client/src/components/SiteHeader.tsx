@@ -12,7 +12,7 @@ export default function SiteHeader(props: { isAuthenticated: boolean }) {
     if (props.isAuthenticated) {
       fetch("/friend/request/incoming")
         .then((res) => res.json())
-        .then((data) => setIncomingFriendRequests(data.requests.length));
+        .then((data) => setIncomingFriendRequests(data.requestingUsers.length));
     }
   }, []);
 

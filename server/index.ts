@@ -24,6 +24,7 @@ import {
   ServerToClientEvents,
   SocketData,
 } from "./gameHandlers/types";
+import { IGame } from "../db/models/game";
 
 dotenv.config({ path: ".env" });
 const port = process.env.PORT || 3001;
@@ -33,6 +34,15 @@ const server = http.createServer(app);
 const io = new Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>(
   server
 );
+
+// Keys are namespaces, values are sets of waiting users
+const globalWaitingRandomUsers = new Map<string, Set<string>>();
+const globalWaitingPrivateUsers = new Map<string, Map<string, string>>(); // For each namespace, keys are creators and values are opponents
+const globalInProgressGames = new Map<string, Map<string, IGame>>();
+
+globalWaitingRandomUsers.set("/tic-tac-toe", new Set<string>());
+globalWaitingPrivateUsers.set("/tic-tac-toe", new Map<string, string>());
+globalInProgressGames.set("/tic-tac-toe", new Map<string, IGame>());
 
 export const connectToMongoose = async () => {
   await mongoose.connect(process.env.MONGO_URI!);
@@ -91,7 +101,18 @@ app.get("*", (req: Request, res: Response) => {
 });
 
 io.of("/tic-tac-toe").on("connection", (socket: Socket) => {
-  require("./gameHandlers/ticTacToe")({ socket, io });
+  let socketNamespace = "/tic-tac-toe";
+  let waitingRandomUsers = globalWaitingRandomUsers.get(socketNamespace);
+  let waitingPrivateUsers = globalWaitingPrivateUsers.get(socketNamespace);
+  let inProgressGames = globalInProgressGames.get(socketNamespace);
+  require("./gameHandlers/ticTacToe")({
+    socket,
+    io,
+    waitingRandomUsers,
+    waitingPrivateUsers,
+    inProgressGames,
+    socketNamespace,
+  });
 });
 
 server.listen(port, () => {

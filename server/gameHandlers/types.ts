@@ -5,12 +5,14 @@ import { IGame } from "../../db/models/game";
 interface GameHandlerParameters {
   socket: Socket;
   io: Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>;
+  waitingRandomUsers: Set<string>;
+  waitingPrivateUsers: Map<string, string>;
+  inProgressGames: Map<string, IGame>;
   socketNamespace: string;
 }
 
 interface RoomHandlerParameters extends GameHandlerParameters {
   gameTypeId: ObjectId;
-  inProgressGames: Map<string, IGame>;
 }
 
 interface ServerToClientEvents {
@@ -19,11 +21,11 @@ interface ServerToClientEvents {
 }
 
 interface ClientToServerEvents {
-  joinRandomGame: (userId: ObjectId) => void;
-  createPrivateGame: (userId: ObjectId) => void;
-  joinPrivateGame: (userId: ObjectId, userToJoin: ObjectId) => void;
-  joinRoom: (gameId: ObjectId) => void;
-  move: (gameId: ObjectId, userId: ObjectId, row: number, col: number) => void;
+  joinRandomGame: (userId: string) => void;
+  createPrivateGame: (userId: string, opponentId: string) => void;
+  joinPrivateGame: (userId: string, userToJoin: string) => void;
+  joinRoom: (gameId: string) => void;
+  move: (gameId: string, userId: string, row: number, col: number) => void;
 }
 
 interface InterServerEvents {
