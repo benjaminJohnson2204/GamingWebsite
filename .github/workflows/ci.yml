@@ -15,6 +15,7 @@ jobs:
       - name: Unit Tests
         env:
           MONGO_URI: ${{ secrets.MONGO_URI }}
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
         run: npm run test
       - name: Formatting
         run: npm run prettier-check
