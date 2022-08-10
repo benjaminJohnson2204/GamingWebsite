@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Navbar, Container, Nav, NavDropdown } from "react-bootstrap";
+import { Navbar, Container, Nav, NavDropdown, Badge } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
 
 export default function SiteHeader(props: { isAuthenticated: boolean }) {
@@ -14,7 +14,7 @@ export default function SiteHeader(props: { isAuthenticated: boolean }) {
         .then((res) => res.json())
         .then((data) => setIncomingFriendRequests(data.requestingUsers.length));
     }
-  }, []);
+  }, [props.isAuthenticated]);
 
   return (
     <Navbar collapseOnSelect bg="info" variant="dark" expand="lg">
@@ -32,13 +32,25 @@ export default function SiteHeader(props: { isAuthenticated: boolean }) {
           {props.isAuthenticated ? (
             <Nav>
               <NavDropdown
-                title="Profile"
+                title={
+                  <>
+                    Profile{" "}
+                    {incomingFriendRequests > 0 && (
+                      <Badge bg="danger">{incomingFriendRequests}</Badge>
+                    )}
+                  </>
+                }
                 show={dropdownVisible}
                 onMouseOver={() => setDropdownVisible(true)}
                 onMouseLeave={() => setDropdownVisible(false)}
               >
                 <NavDropdown.Item href="/profile">Profile</NavDropdown.Item>
-                <NavDropdown.Item href="/friends">Friends</NavDropdown.Item>
+                <NavDropdown.Item href="/friends">
+                  Friends{" "}
+                  {incomingFriendRequests > 0 && (
+                    <Badge bg="danger">{incomingFriendRequests}</Badge>
+                  )}
+                </NavDropdown.Item>
                 <NavDropdown.Divider />
                 <NavDropdown.Item
                   href={location.pathname}

@@ -15,6 +15,7 @@ export default function useAuthenticated() {
         navigate(`/login?next=${location.pathname}`);
       }
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return user;

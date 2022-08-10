@@ -4,10 +4,7 @@ import app from "../server/index";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import mongoUnit from "mongo-unit";
-import testData from "./authTestData.json";
-import prepare from "mocha-prepare";
 import { User } from "../db/models/user";
-import mongoose from "mongoose";
 
 const assert = chai.assert;
 chai.use(chaiHttp);

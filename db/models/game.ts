@@ -6,16 +6,18 @@ import { User } from "./user";
 const ObjectId = mongoose.Types.ObjectId;
 
 interface IGame extends IDocument {
-  type: mongoose.Schema.Types.ObjectId;
-  userIds: mongoose.Schema.Types.ObjectId[];
+  type: mongoose.Types.ObjectId;
+  userIds: mongoose.Types.ObjectId[];
+  usernames: string[];
   complete: Boolean;
-  winner: mongoose.Schema.Types.ObjectId;
+  winner: mongoose.Types.ObjectId;
   score: Object;
 }
 
 const gameSchema = new mongoose.Schema<IGame>({
-  type: { type: ObjectId, ref: GameType },
+  type: { type: mongoose.Schema.Types.ObjectId, ref: GameType },
   userIds: [ObjectId],
+  usernames: [String],
   complete: Boolean,
   winner: ObjectId,
   score: Object,

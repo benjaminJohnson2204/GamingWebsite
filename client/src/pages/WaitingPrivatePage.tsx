@@ -3,7 +3,6 @@ import SiteHeader from "../components/SiteHeader";
 import { ServerToClientEvents, ClientToServerEvents } from "../../../server/gameHandlers/types";
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect } from "react";
-import { IUser } from "../../../db/models/user";
 import useAuthenticated from "../components/useAuthenticated";
 
 export default function WaitingPrivatePage() {
@@ -20,12 +19,15 @@ export default function WaitingPrivatePage() {
         navigate(`/play/${gameType}/${game._id}`);
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   return (
     <div>
       <SiteHeader isAuthenticated={true} />
-      <div className="page"></div>
+      <div className="page">
+        <h1>Waiting for opponent to accept challenge...</h1>
+      </div>
     </div>
   );
 }

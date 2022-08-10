@@ -8,7 +8,8 @@ export default function NotFoundPage() {
     fetch("/auth/user").then((res: Response) => {
       setAuthenticated(res.ok);
     });
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div>

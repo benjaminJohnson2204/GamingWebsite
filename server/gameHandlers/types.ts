@@ -1,13 +1,12 @@
 import { ObjectId } from "mongoose";
 import type { Server, Socket } from "socket.io";
-import { IGame } from "../../db/models/game";
 
 interface GameHandlerParameters {
   socket: Socket;
   io: Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>;
   waitingRandomUsers: Set<string>;
   waitingPrivateUsers: Map<string, string>;
-  inProgressGames: Map<string, IGame>;
+  inProgressGames: Map<string, any>;
   socketNamespace: string;
 }
 
@@ -16,8 +15,8 @@ interface RoomHandlerParameters extends GameHandlerParameters {
 }
 
 interface ServerToClientEvents {
-  joinedGame: (game: IGame) => void;
-  gameUpdate: (game: IGame) => void;
+  joinedGame: (game: any) => void;
+  gameUpdate: (game: any) => void;
 }
 
 interface ClientToServerEvents {

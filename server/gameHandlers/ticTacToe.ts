@@ -1,11 +1,11 @@
-import { ObjectId } from "mongoose";
+import mongoose from "mongoose";
 import { Game, IGame } from "../../db/models/game";
 import { GameType } from "../../db/models/gameType";
 import { GameHandlerParameters } from "./types";
 
 export interface TicTacToeGame extends IGame {
   squares: String[][]; // Store squares as empty strings, "X", or "O"
-  xPlayer: ObjectId;
+  xPlayer: mongoose.Types.ObjectId;
   turn: String; // "X" or "O"
 }
 
@@ -35,7 +35,7 @@ const checkForWinner = (game: TicTacToeGame) => {
     }
   }
   // Diagonals
-  if (game.squares[0][0] === game.squares[1][1] && game.squares[0][0] === game.squares[3][3]) {
+  if (game.squares[0][0] === game.squares[1][1] && game.squares[0][0] === game.squares[2][2]) {
     winner = game.squares[1][1];
   } else if (
     game.squares[2][0] === game.squares[1][1] &&
@@ -79,18 +79,21 @@ module.exports = ({
 
   socket.on("joinRoom", (gameId) => {
     socket.join(gameId);
-    const game = inProgressGames.get(gameId) as TicTacToeGame;
-    game.squares = [
-      ["", "", ""],
-      ["", "", ""],
-      ["", "", ""],
-    ];
-    game.xPlayer = flipACoin() ? game.userIds[0] : game.userIds[1];
-    game.turn = "X";
+    const game = inProgressGames.get(gameId);
+    if (!game.hasOwnProperty("squares")) {
+      game.squares = [
+        ["", "", ""],
+        ["", "", ""],
+        ["", "", ""],
+      ];
+      game.xPlayer = flipACoin() ? game.userIds[0] : game.userIds[1];
+      game.turn = "X";
+    }
+    io.of(socketNamespace).to(game._id.toString()).emit("gameUpdate", game);
   });
 
   socket.on("move", (gameId, userId, row, col) => {
-    const game = inProgressGames.get(gameId) as TicTacToeGame;
+    const game = inProgressGames.get(gameId);
     const playersLetter = userId === game.xPlayer ? "X" : "O";
 
     // Ensure that it's this user's turn and the square is available
@@ -104,10 +107,12 @@ module.exports = ({
       game.winner =
         winner === "X"
           ? game.xPlayer
-          : game.userIds.filter((id: ObjectId) => id !== game.xPlayer)[0];
-      Game.updateOne({ _id: game._id }, { completed: true, winner: game.winner });
+          : game.userIds.filter((id: mongoose.Types.ObjectId) => id !== game.xPlayer)[0];
+      game.complete = true;
+      Game.updateOne({ _id: game._id }, { complete: true, winner: game.winner });
     } else if (checkForTie(game)) {
-      Game.updateOne({ _id: game._id }, { completed: true });
+      game.complete = true;
+      Game.updateOne({ _id: game._id }, { complete: true });
     } else {
       switchTurns(game);
     }

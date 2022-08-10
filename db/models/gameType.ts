@@ -3,12 +3,14 @@ import { IDocument } from "./document";
 
 interface IGameType extends IDocument {
   name: string;
+  socketNamespace: string;
   description: string;
   numPlayers: Number;
 }
 
 const gameTypeSchema = new mongoose.Schema<IGameType>({
   name: String,
+  socketNamespace: String,
   description: String,
   numPlayers: Number,
 });

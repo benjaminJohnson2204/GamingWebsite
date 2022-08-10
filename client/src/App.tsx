@@ -10,6 +10,7 @@ import NotFoundPage from "./pages/NotFoundPage";
 import WaitingRandomPage from "./pages/WaitingRandomPage";
 import WaitingPrivatePage from "./pages/WaitingPrivatePage";
 import PlayGamePage from "./pages/PlayGamePage";
+import GameInfoPage from "./pages/GameInfoPage";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
 
           <Route path="/friends" element={<FriendsPage />} />
 
+          <Route path="/info/:gameType" element={<GameInfoPage />} />
           <Route path="/waiting-random/:gameType" element={<WaitingRandomPage />} />
           <Route path="/waiting-private/:gameType/:userToJoin" element={<WaitingPrivatePage />} />
 
