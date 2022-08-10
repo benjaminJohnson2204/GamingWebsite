@@ -13,7 +13,7 @@ interface LoginValues {
 function LoginPage(props: { cookies: Cookies }) {
   const navigate = useNavigate();
   const [error, setError] = useState(false);
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     fetch("/auth/user").then((res: Response) => {
@@ -21,6 +21,7 @@ function LoginPage(props: { cookies: Cookies }) {
         navigate(searchParams.get("next") || "/");
       }
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   return (
