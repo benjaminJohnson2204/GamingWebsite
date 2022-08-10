@@ -21,7 +21,11 @@ export default function GameInfoCard(props: { isAuthenticated: boolean; gameType
         {props.isAuthenticated ? (
           props.gameType.numPlayers > 1 ? (
             <>
-              <Button as="a" href={`/waiting-random/${props.gameType.socketNamespace}`}>
+              <Button
+                as="a"
+                href={`/waiting-random/${props.gameType.socketNamespace}`}
+                style={{ whiteSpace: "normal" }}
+              >
                 Play a random opponent
               </Button>
               <p />

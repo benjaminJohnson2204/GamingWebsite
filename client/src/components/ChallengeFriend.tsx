@@ -24,10 +24,9 @@ export default function ChallengeFriend(props: { gameType: string }) {
 
   return (
     <>
-      <h3>Play a friend</h3>
       <Form onSubmit={challengeFriend}>
         <Form.Group>
-          <Form.Label>Friend to challenge</Form.Label>
+          <Form.Label>Challenge a friend</Form.Label>
           <Form.Select>
             <option value=""></option>
             {friends &&

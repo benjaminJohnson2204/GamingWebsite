@@ -46,7 +46,7 @@ export default function TicTacToe(props: {
           <Col xs={12} sm={8} md={6}>
             {game.complete && !game.winner && <h2>It's a tie!</h2>}
             <Container fluid>
-              <table>
+              <table className="m-auto">
                 <tbody>
                   {game.squares.map((row, rowIndex) => (
                     <tr>
