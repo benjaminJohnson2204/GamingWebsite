@@ -50,7 +50,7 @@ export const connectToMongoose = async () => {
   await mongoose.connect(process.env.MONGO_URI || "");
 };
 
-if (process.env.TEST_ENV?.trim() !== "TRUE") {
+if (!process.argv.includes("--exit")) {
   connectToMongoose(); // Need to delay connecting for tests because those change the Mongo URI
 }
 

@@ -4,8 +4,8 @@
   "description": "A website I'm creating for fun where people can play single-player and multi-player games. Stack is MongoDB, Express, React, Node, and TypeScript",
   "main": "index.js",
   "scripts": {
-    "test": "set TEST_ENV=TRUE && mocha --exit --require ts-node/register --require tests/test-preparer.ts 'tests/*.ts'",
-    "start": "set TEST_ENV=FALSE && tsc && node dist/server/index.js",
+    "test": "mocha --exit --require ts-node/register --require tests/test-preparer.ts 'tests/*.ts'",
+    "start": "tsc && node dist/server/index.js",
     "build": "cd client && npm install && npm run build",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write .",
