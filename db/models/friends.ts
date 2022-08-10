@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { IDocument } from "./document";
 
 const ObjectId = mongoose.Schema.Types.ObjectId;
-const { User } = require("./user");
+import { User } from "./user";
 
 interface IFriendship extends IDocument {
   userIds: mongoose.Types.ObjectId[];

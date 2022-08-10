@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
 import { Game, IGame } from "../../db/models/game";
-import { GameType } from "../../db/models/gameType";
 import { GameHandlerParameters } from "./types";
+import handleRooms from "./handleRooms";
 
 export interface TicTacToeGame extends IGame {
-  squares: String[][]; // Store squares as empty strings, "X", or "O"
+  squares: string[][]; // Store squares as empty strings, "X", or "O"
   xPlayer: mongoose.Types.ObjectId;
-  turn: String; // "X" or "O"
+  turn: string; // "X" or "O"
 }
 
 const flipACoin = () => Math.random() < 0.5;
@@ -47,8 +47,8 @@ const checkForWinner = (game: TicTacToeGame) => {
 };
 
 const checkForTie = (game: TicTacToeGame) => {
-  for (let row of game.squares) {
-    for (let square of row) {
+  for (const row of game.squares) {
+    for (const square of row) {
       if (!square) {
         return false;
       }
@@ -57,17 +57,17 @@ const checkForTie = (game: TicTacToeGame) => {
   return true;
 };
 
-module.exports = ({
+export default function ticTacToeHandler({
   socket,
   io,
   waitingRandomUsers,
   waitingPrivateUsers,
   inProgressGames,
   socketNamespace,
-}: GameHandlerParameters) => {
-  const gameTypeId = "62ecb1695918d6b6bab9f988";
+}: GameHandlerParameters) {
+  const gameTypeId = new mongoose.Schema.Types.ObjectId("62ecb1695918d6b6bab9f988");
 
-  require("./handleRooms")({
+  handleRooms({
     socket,
     io,
     waitingRandomUsers,
@@ -80,7 +80,7 @@ module.exports = ({
   socket.on("joinRoom", (gameId) => {
     socket.join(gameId);
     const game = inProgressGames.get(gameId);
-    if (!game.hasOwnProperty("squares")) {
+    if (!Object.prototype.hasOwnProperty.call(game, "squares")) {
       game.squares = [
         ["", "", ""],
         ["", "", ""],
@@ -118,4 +118,4 @@ module.exports = ({
     }
     io.of(socketNamespace).to(game._id.toString()).emit("gameUpdate", game);
   });
-};
+}

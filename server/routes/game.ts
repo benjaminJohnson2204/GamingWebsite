@@ -1,10 +1,9 @@
-import { Request, Response } from "express";
+import express, { Request, Response } from "express";
 import { Game } from "../../db/models/game";
-import { GameType } from "../../db/models/gameType";
 import { IUser } from "../../db/models/user";
 import { ensureAuthenticated } from "./auth";
 
-const router = require("express").Router();
+const router = express.Router();
 
 router.use("*", ensureAuthenticated);
 

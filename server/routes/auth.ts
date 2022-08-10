@@ -1,11 +1,13 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { IUser, User } from "../../db/models/user";
 
-const router = require("express").Router();
-const passport = require("passport");
-const bcrypt = require("bcrypt");
+import express from "express";
+import passport from "passport";
+import bcrypt from "bcrypt";
 
-const ensureAuthenticated = (req: Request, res: Response, next: Function) => {
+const router = express.Router();
+
+const ensureAuthenticated = (req: Request, res: Response, next: NextFunction) => {
   if (req.isAuthenticated()) {
     return next();
   }
@@ -18,7 +20,7 @@ router.get("/user", ensureAuthenticated, (req: Request, res: Response) => {
 
 router.post(
   "/register",
-  async (req: Request, res: Response, next: Function) => {
+  async (req: Request, res: Response, next: (err: unknown, user?: IUser | null) => void) => {
     if (req.body.password !== req.body.confirmation) {
       return res.status(400).json({ error: "passwords don't match" });
     }
@@ -29,7 +31,7 @@ router.post(
     }
     const newUser: IUser = await User.create({ username: req.body.username, password: hash });
     if (newUser) {
-      req.login(newUser, (error: any) => {
+      req.login(newUser, (error: unknown) => {
         if (error) {
           return next(error);
         }

@@ -11,7 +11,7 @@ chai.use(chaiHttp);
 
 dotenv.config({ path: ".env" });
 
-var agent: ChaiHttp.Agent;
+let agent: ChaiHttp.Agent;
 
 describe("Authentication Tests", () => {
   before(async () => {

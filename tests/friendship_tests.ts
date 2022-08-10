@@ -4,8 +4,6 @@ import app from "../server/index";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import mongoUnit from "mongo-unit";
-import testData from "./authTestData.json";
-import prepare from "mocha-prepare";
 import { IUser, User } from "../db/models/user";
 
 const assert = chai.assert;
@@ -13,10 +11,10 @@ chai.use(chaiHttp);
 
 dotenv.config({ path: ".env" });
 
-var agent1: ChaiHttp.Agent;
-var agent2: ChaiHttp.Agent;
-var user1: IUser;
-var user2: IUser;
+let agent1: ChaiHttp.Agent;
+let agent2: ChaiHttp.Agent;
+let user1: IUser;
+let user2: IUser;
 
 describe("Friendship Tests", () => {
   before(async () => {

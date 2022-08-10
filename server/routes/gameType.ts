@@ -1,7 +1,7 @@
-import { Request, Response } from "express";
+import express, { Request, Response } from "express";
 import { GameType, IGameType } from "../../db/models/gameType";
 
-const router = require("express").Router();
+const router = express.Router();
 
 router.get("/all", async (req: Request, res: Response) => {
   const gameTypes = await GameType.find({});

@@ -1,9 +1,8 @@
-import { ObjectId } from "mongoose";
 import { Game, IGame } from "../../db/models/game";
 import { IUser, User } from "../../db/models/user";
 import { RoomHandlerParameters } from "./types";
 
-module.exports = ({
+export default function handleRooms({
   socket,
   io,
   waitingRandomUsers,
@@ -11,17 +10,17 @@ module.exports = ({
   inProgressGames,
   socketNamespace,
   gameTypeId,
-}: RoomHandlerParameters) => {
+}: RoomHandlerParameters) {
   socket.on("joinRandomGame", async (userId) => {
     if (waitingRandomUsers.size > 0) {
       // Get first user (one who has been waiting the longest)
-      let [userToJoin] = waitingRandomUsers.values();
-      let user1: IUser | null = await User.findById(userId);
-      let user2: IUser | null = await User.findById(userToJoin);
+      const [userToJoin] = waitingRandomUsers.values();
+      const user1: IUser | null = await User.findById(userId);
+      const user2: IUser | null = await User.findById(userToJoin);
       if (!user1 || !user2) {
         return socket.emit("error", "One or both users does not exist");
       }
-      let game: IGame = await Game.create({
+      const game: IGame = await Game.create({
         type: gameTypeId,
         userIds: [userId, userToJoin],
         usernames: [user1.username, user2.username],
@@ -52,12 +51,12 @@ module.exports = ({
   socket.on("joinPrivateGame", async (userId, userToJoin) => {
     if (waitingPrivateUsers.has(userToJoin)) {
       waitingPrivateUsers.delete(userToJoin);
-      let user1: IUser | null = await User.findById(userId);
-      let user2: IUser | null = await User.findById(userToJoin);
+      const user1: IUser | null = await User.findById(userId);
+      const user2: IUser | null = await User.findById(userToJoin);
       if (!user1 || !user2) {
         return socket.emit("error", "One or both users does not exist");
       }
-      let game: IGame = await Game.create({
+      const game: IGame = await Game.create({
         type: gameTypeId,
         userIds: [userId, userToJoin],
         usernames: [user1.username, user2.username],
@@ -78,9 +77,9 @@ module.exports = ({
     }
   });
 
-  socket.on("disconnecting", (reason) => {
+  socket.on("disconnecting", () => {
     // Remove user as a waiting user
-    for (let room of socket.rooms) {
+    for (const room of socket.rooms) {
       if (waitingRandomUsers.has(room)) {
         waitingRandomUsers.delete(room);
       } else if (waitingPrivateUsers.has(room)) {
@@ -88,4 +87,4 @@ module.exports = ({
       }
     }
   });
-};
+}

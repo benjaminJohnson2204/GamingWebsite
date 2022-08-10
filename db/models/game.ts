@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import { IDocument } from "./document";
 import { GameType } from "./gameType";
-import { User } from "./user";
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -9,9 +8,10 @@ interface IGame extends IDocument {
   type: mongoose.Types.ObjectId;
   userIds: mongoose.Types.ObjectId[];
   usernames: string[];
-  complete: Boolean;
+  complete: boolean;
   winner: mongoose.Types.ObjectId;
-  score: Object;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  score: any;
 }
 
 const gameSchema = new mongoose.Schema<IGame>({

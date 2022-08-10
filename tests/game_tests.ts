@@ -10,7 +10,7 @@ chai.use(chaiHttp);
 
 dotenv.config({ path: ".env" });
 
-var agent: ChaiHttp.Agent;
+let agent: ChaiHttp.Agent;
 
 describe("Game Tests", () => {
   before(async () => {

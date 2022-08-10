@@ -6,6 +6,7 @@ interface GameHandlerParameters {
   io: Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>;
   waitingRandomUsers: Set<string>;
   waitingPrivateUsers: Map<string, string>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   inProgressGames: Map<string, any>;
   socketNamespace: string;
 }
@@ -15,7 +16,9 @@ interface RoomHandlerParameters extends GameHandlerParameters {
 }
 
 interface ServerToClientEvents {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   joinedGame: (game: any) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   gameUpdate: (game: any) => void;
 }
 
@@ -31,6 +34,7 @@ interface InterServerEvents {
   ping: () => void;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface SocketData {}
 
 export {

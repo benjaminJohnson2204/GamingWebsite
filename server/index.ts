@@ -26,6 +26,8 @@ import {
 } from "./gameHandlers/types";
 import { IGame } from "../db/models/game";
 
+import ticTacToeHandler from "./gameHandlers/ticTacToe";
+
 dotenv.config({ path: ".env" });
 const port = process.env.PORT || 3001;
 
@@ -45,7 +47,7 @@ globalWaitingPrivateUsers.set("/tic-tac-toe", new Map<string, string>());
 globalInProgressGames.set("/tic-tac-toe", new Map<string, IGame>());
 
 export const connectToMongoose = async () => {
-  await mongoose.connect(process.env.MONGO_URI!);
+  await mongoose.connect(process.env.MONGO_URI || "");
 };
 
 if (process.env.TEST_ENV?.trim() !== "TRUE") {
@@ -59,7 +61,7 @@ app.use(bodyParser.json());
 
 app.use(
   session({
-    secret: process.env.SESSION_SECRET!,
+    secret: process.env.SESSION_SECRET || "",
     resave: true,
     saveUninitialized: true,
     cookie: { secure: false },
@@ -69,17 +71,17 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-passport.serializeUser((user: Express.User, done: Function) => {
+passport.serializeUser((user: Express.User, done) => {
   done(null, (user as IUser)._id);
 });
 
-passport.deserializeUser(async (id: ObjectId, done: Function) => {
+passport.deserializeUser(async (id: ObjectId, done) => {
   const user: IUser | null = await User.findById(id);
   return done(null, user);
 });
 
 passport.use(
-  new LocalStrategy(async (username: string, password: string, done: Function) => {
+  new LocalStrategy(async (username: string, password: string, done) => {
     const user: IUser | null = await User.findOne({ username: username });
     if (!user) {
       return done(null, false);
@@ -101,11 +103,11 @@ app.get("*", (req: Request, res: Response) => {
 });
 
 io.of("/tic-tac-toe").on("connection", (socket: Socket) => {
-  let socketNamespace = "/tic-tac-toe";
-  let waitingRandomUsers = globalWaitingRandomUsers.get(socketNamespace);
-  let waitingPrivateUsers = globalWaitingPrivateUsers.get(socketNamespace);
-  let inProgressGames = globalInProgressGames.get(socketNamespace);
-  require("./gameHandlers/ticTacToe")({
+  const socketNamespace = "/tic-tac-toe";
+  const waitingRandomUsers = globalWaitingRandomUsers.get(socketNamespace) || new Set();
+  const waitingPrivateUsers = globalWaitingPrivateUsers.get(socketNamespace) || new Map();
+  const inProgressGames = globalInProgressGames.get(socketNamespace) || new Map();
+  ticTacToeHandler({
     socket,
     io,
     waitingRandomUsers,

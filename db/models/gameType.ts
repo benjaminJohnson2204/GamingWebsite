@@ -5,7 +5,7 @@ interface IGameType extends IDocument {
   name: string;
   socketNamespace: string;
   description: string;
-  numPlayers: Number;
+  numPlayers: number;
 }
 
 const gameTypeSchema = new mongoose.Schema<IGameType>({

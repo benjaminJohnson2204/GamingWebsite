@@ -1,10 +1,10 @@
 import { FriendRequest, Friendship, IFriendRequest, IFriendship } from "../../db/models/friends";
 import { ensureAuthenticated } from "./auth";
-import { Request, Response } from "express";
+import express, { Request, Response } from "express";
 import { IUser, User } from "../../db/models/user";
 import mongoose from "mongoose";
 
-const router = require("express").Router();
+const router = express.Router();
 
 router.use("*", ensureAuthenticated);
 
@@ -21,7 +21,8 @@ router.get("/search", async (req: Request, res: Response) => {
     },
   });
   const userData = [];
-  for (let user of users) {
+  for (const user of users) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data: any = { user: user };
     const friendship: IFriendship | null = await Friendship.findOne({
       userIds: { $all: [(req.user as IUser)._id, user._id] },
