@@ -12,11 +12,14 @@ export default function ChallengeFriend(props: { gameType: string }) {
     fetch("/friend/all")
       .then((res) => res.json())
       .then((data) => setFriends(data.friends));
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const challengeFriend = (event: React.ChangeEvent<any>) => {
     event.preventDefault();
-    navigate(`/waiting-private/${props.gameType}/${event.target[0].value}`);
+    if (event.target[0].value) {
+      navigate(`/waiting-private/${props.gameType}/${event.target[0].value}`);
+    }
   };
 
   return (

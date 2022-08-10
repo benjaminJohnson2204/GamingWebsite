@@ -14,6 +14,7 @@ export default function WaitingRandomPage() {
   useEffect(() => {
     if (user) {
       socket.emit("joinRandomGame", user._id.toString());
+
       socket.on("joinedGame", (game) => {
         navigate(`/play/${gameType}/${game._id}`);
       });

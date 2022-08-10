@@ -4,6 +4,7 @@ import SiteHeader from "../components/SiteHeader";
 
 import { IUser } from "../../../db/models/user";
 import mongoose from "mongoose";
+import useAuthenticated from "../components/useAuthenticated";
 
 export interface IUserSearchData {
   user: IUser;
@@ -13,6 +14,8 @@ export interface IUserSearchData {
 }
 
 export default function FriendsPage() {
+  useAuthenticated();
+
   const [incomingRequests, setIncomingRequests] = useState<IUser[]>([]);
   const [outgoingRequests, setOutgoingRequests] = useState<IUser[]>([]);
   const [friends, setFriends] = useState<IUser[]>([]);
@@ -102,7 +105,7 @@ export default function FriendsPage() {
 
   return (
     <div>
-      <SiteHeader isAuthenticated={true} />
+      <SiteHeader isAuthenticated={true} reloadFriends={reloadFriends} />
       <div className="page">
         <Container fluid className="m-3">
           <Row>

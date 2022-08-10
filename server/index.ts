@@ -8,7 +8,7 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import session from "express-session";
 import { Socket, Server } from "socket.io";
-import mongoose, { ObjectId } from "mongoose";
+import mongoose from "mongoose";
 
 import { IUser } from "../db/models/user";
 
@@ -38,13 +38,13 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents, InterServerEve
 );
 
 // Keys are namespaces, values are sets of waiting users
-const globalWaitingRandomUsers = new Map<string, Set<string>>();
-const globalWaitingPrivateUsers = new Map<string, Map<string, string>>(); // For each namespace, keys are creators and values are opponents
-const globalInProgressGames = new Map<string, Map<string, IGame>>();
+export const globalWaitingRandomUsers = new Map<string, Set<string>>();
+export const globalWaitingPrivateUsers = new Map<string, Map<string, string>>(); // For each namespace, keys are creators and values are opponents
+export const globalInProgressGames = new Map<string, Map<string, IGame>>();
 
-globalWaitingRandomUsers.set("/tic-tac-toe", new Set<string>());
-globalWaitingPrivateUsers.set("/tic-tac-toe", new Map<string, string>());
-globalInProgressGames.set("/tic-tac-toe", new Map<string, IGame>());
+globalWaitingRandomUsers.set("tic-tac-toe", new Set<string>());
+globalWaitingPrivateUsers.set("tic-tac-toe", new Map<string, string>());
+globalInProgressGames.set("tic-tac-toe", new Map<string, IGame>());
 
 export const connectToMongoose = async () => {
   await mongoose.connect(process.env.MONGO_URI || "");
@@ -75,7 +75,7 @@ passport.serializeUser((user: Express.User, done) => {
   done(null, (user as IUser)._id);
 });
 
-passport.deserializeUser(async (id: ObjectId, done) => {
+passport.deserializeUser(async (id: mongoose.Types.ObjectId, done) => {
   const user: IUser | null = await User.findById(id);
   return done(null, user);
 });
@@ -103,7 +103,7 @@ app.get("*", (req: Request, res: Response) => {
 });
 
 io.of("/tic-tac-toe").on("connection", (socket: Socket) => {
-  const socketNamespace = "/tic-tac-toe";
+  const socketNamespace = "tic-tac-toe";
   const waitingRandomUsers = globalWaitingRandomUsers.get(socketNamespace) || new Set();
   const waitingPrivateUsers = globalWaitingPrivateUsers.get(socketNamespace) || new Map();
   const inProgressGames = globalInProgressGames.get(socketNamespace) || new Map();

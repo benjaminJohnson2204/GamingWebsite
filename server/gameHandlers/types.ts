@@ -1,4 +1,4 @@
-import { ObjectId } from "mongoose";
+import mongoose from "mongoose";
 import type { Server, Socket } from "socket.io";
 
 interface GameHandlerParameters {
@@ -12,7 +12,7 @@ interface GameHandlerParameters {
 }
 
 interface RoomHandlerParameters extends GameHandlerParameters {
-  gameTypeId: ObjectId;
+  gameTypeId: mongoose.Types.ObjectId;
 }
 
 interface ServerToClientEvents {

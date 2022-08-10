@@ -30,7 +30,7 @@ const checkForWinner = (game: TicTacToeGame) => {
     }
     // Columns
     if (game.squares[0][i] === game.squares[1][i] && game.squares[0][i] === game.squares[2][i]) {
-      winner = game.squares[i];
+      winner = game.squares[0][i];
       break;
     }
   }
@@ -65,7 +65,7 @@ export default function ticTacToeHandler({
   inProgressGames,
   socketNamespace,
 }: GameHandlerParameters) {
-  const gameTypeId = new mongoose.Schema.Types.ObjectId("62ecb1695918d6b6bab9f988");
+  const gameTypeId = new mongoose.Types.ObjectId("62ecb1695918d6b6bab9f988");
 
   handleRooms({
     socket,
@@ -92,7 +92,7 @@ export default function ticTacToeHandler({
     io.of(socketNamespace).to(game._id.toString()).emit("gameUpdate", game);
   });
 
-  socket.on("move", (gameId, userId, row, col) => {
+  socket.on("move", async (gameId, userId, row, col) => {
     const game = inProgressGames.get(gameId);
     const playersLetter = userId === game.xPlayer ? "X" : "O";
 
@@ -103,19 +103,21 @@ export default function ticTacToeHandler({
 
     game.squares[row][col] = playersLetter;
     const winner = checkForWinner(game);
+    let updatedGame;
     if (winner) {
       game.winner =
         winner === "X"
           ? game.xPlayer
           : game.userIds.filter((id: mongoose.Types.ObjectId) => id !== game.xPlayer)[0];
       game.complete = true;
-      Game.updateOne({ _id: game._id }, { complete: true, winner: game.winner });
+      updatedGame = Game.updateOne({ _id: game._id }, { complete: true, winner: game.winner });
     } else if (checkForTie(game)) {
       game.complete = true;
-      Game.updateOne({ _id: game._id }, { complete: true });
+      updatedGame = Game.updateOne({ _id: game._id }, { complete: true });
     } else {
       switchTurns(game);
     }
     io.of(socketNamespace).to(game._id.toString()).emit("gameUpdate", game);
+    await updatedGame;
   });
 }
