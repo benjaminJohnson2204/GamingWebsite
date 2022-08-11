@@ -4,7 +4,7 @@ import { DotsAndBoxesGame } from "../../../server/gameHandlers/dotsAndBoxes";
 import { IUser } from "../../../db/models/user";
 import { ClientToServerEvents, ServerToClientEvents } from "../../../server/gameHandlers/types";
 import { Col, Container, Form, Row } from "react-bootstrap";
-import { Circle, Rect, Layer, Stage } from "react-konva";
+import { Circle, Rect, Layer, Stage, Shape } from "react-konva";
 
 interface IDimensions {
   boxWidth: number;
@@ -19,11 +19,17 @@ export default function DotsAndBoxes(props: {
   gameId: string;
 }) {
   const [game, setGame] = useState<DotsAndBoxesGame>();
+  const [stageWidth, setStageWidth] = useState(0);
   const [lengths, setLengths] = useState<IDimensions>();
   const [selectedDotIndicies, setSelectedDotIndices] = useState({ row: -1, col: -1 });
+  const [mousePosition, setMousePosition] = useState({ x: -1, y: -1 });
+  const [mouseOffset, setMouseOffset] = useState({ x: -1, y: -1 });
+  const [container, setContainer] = useState<HTMLElement>();
   const [availableColors, setAvailableColors] = useState<string[]>();
 
   useEffect(() => {
+    window.onresize = resizeGame;
+
     fetch("/game/dots-and-boxes/colors")
       .then((res) => res.json())
       .then((data) => setAvailableColors(data));
@@ -38,21 +44,26 @@ export default function DotsAndBoxes(props: {
         setGame(_game);
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.socket, props.gameId]);
 
   useEffect(() => {
+    resizeGame();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [game]);
+
+  const resizeGame = () => {
     if (game) {
-      const boxWidth =
-        ((document.getElementById("game-container")?.offsetWidth || 0) * 0.9) /
-        game.boxes[0].length;
+      const boxWidth = ((container?.offsetWidth || 0) * 0.9) / game.boxes[0].length;
       setLengths({
         boxWidth: boxWidth,
         boxHeight: boxWidth,
         dotRadius: boxWidth / 8,
         lineThickness: boxWidth / 8,
       });
+      setStageWidth(container?.offsetWidth || 0);
     }
-  }, [game]);
+  };
 
   const renderDots = (_game: DotsAndBoxesGame, _lengths: IDimensions) => {
     const dots = [];
@@ -65,7 +76,13 @@ export default function DotsAndBoxes(props: {
             y={_lengths.dotRadius + i * _lengths.boxHeight}
             radius={_lengths.dotRadius}
             fill="black"
-            onMouseDown={() => setSelectedDotIndices({ row: i, col: j })}
+            onMouseDown={(event) => {
+              setSelectedDotIndices({ row: i, col: j });
+              setMouseOffset({
+                x: event.evt.clientX - (_lengths.dotRadius + j * _lengths.boxWidth),
+                y: event.evt.clientY - (_lengths.dotRadius + i * _lengths.boxHeight),
+              });
+            }}
             onMouseUp={() => {
               if (
                 game &&
@@ -172,13 +189,19 @@ export default function DotsAndBoxes(props: {
               </Form.Group>
             </Form>
           </Col>
-          <Col xs={12} sm={8} md={6} id="game-container">
+          <Col
+            xs={12}
+            sm={8}
+            md={6}
+            id="game-container"
+            ref={(node: HTMLElement) => setContainer(node)}
+          >
             {game.complete && !game.winner && <h2>It's a tie!</h2>}
-            <Container fluid>
-              <Stage
-                width={document.getElementById("game-container")?.offsetWidth}
-                height={window.innerHeight}
-              >
+            <Container
+              fluid
+              onMouseMove={(event) => setMousePosition({ x: event.clientX, y: event.clientY })}
+            >
+              <Stage width={stageWidth} height={window.innerHeight}>
                 <Layer>
                   {game.boxes.map((row, rowIndex) =>
                     row.map(
@@ -237,6 +260,32 @@ export default function DotsAndBoxes(props: {
                   ))}
 
                   {renderDots(game, lengths)}
+
+                  <Shape
+                    sceneFunc={(context, shape) => {
+                      if (
+                        mousePosition.x === -1 ||
+                        mousePosition.y === -1 ||
+                        selectedDotIndicies["col"] === -1 ||
+                        selectedDotIndicies["row"] === -1
+                      ) {
+                        return;
+                      }
+                      context.beginPath();
+                      context.moveTo(
+                        lengths.dotRadius + selectedDotIndicies["col"] * lengths.boxWidth,
+                        lengths.dotRadius + selectedDotIndicies["row"] * lengths.boxHeight
+                      );
+                      context.lineTo(
+                        mousePosition.x - mouseOffset.x,
+                        mousePosition.y - mouseOffset.y
+                      );
+                      context.closePath();
+                      context.fillStrokeShape(shape);
+                    }}
+                    stroke="brown"
+                    strokeWidth={lengths.lineThickness}
+                  />
                 </Layer>
               </Stage>
             </Container>
