@@ -20,6 +20,7 @@ import { router as gameRouter } from "./routes/game";
 import { User } from "../db/models/user";
 import {
   ClientToServerEvents,
+  GameHandlerParameters,
   InterServerEvents,
   ServerToClientEvents,
   SocketData,
@@ -27,6 +28,7 @@ import {
 import { IGame } from "../db/models/game";
 
 import ticTacToeHandler from "./gameHandlers/ticTacToe";
+import dotsAndBoxesHandler from "./gameHandlers/dotsAndBoxes";
 
 dotenv.config({ path: ".env" });
 const port = process.env.PORT || 3001;
@@ -42,9 +44,40 @@ export const globalWaitingRandomUsers = new Map<string, Set<string>>();
 export const globalWaitingPrivateUsers = new Map<string, Map<string, string>>(); // For each namespace, keys are creators and values are opponents
 export const globalInProgressGames = new Map<string, Map<string, IGame>>();
 
-globalWaitingRandomUsers.set("tic-tac-toe", new Set<string>());
-globalWaitingPrivateUsers.set("tic-tac-toe", new Map<string, string>());
-globalInProgressGames.set("tic-tac-toe", new Map<string, IGame>());
+const gameHandlers = new Map<
+  string,
+  ({
+    socket,
+    io,
+    waitingRandomUsers,
+    waitingPrivateUsers,
+    inProgressGames,
+    socketNamespace,
+  }: GameHandlerParameters) => void
+>();
+gameHandlers.set("tic-tac-toe", ticTacToeHandler);
+gameHandlers.set("dots-and-boxes", dotsAndBoxesHandler);
+
+for (const socketNamespace of gameHandlers.keys()) {
+  globalWaitingRandomUsers.set(socketNamespace, new Set<string>());
+  globalWaitingPrivateUsers.set(socketNamespace, new Map<string, string>());
+  globalInProgressGames.set(socketNamespace, new Map<string, IGame>());
+
+  io.of(`/${socketNamespace}`).on("connection", (socket: Socket) => {
+    const waitingRandomUsers = globalWaitingRandomUsers.get(socketNamespace) || new Set();
+    const waitingPrivateUsers = globalWaitingPrivateUsers.get(socketNamespace) || new Map();
+    const inProgressGames = globalInProgressGames.get(socketNamespace) || new Map();
+
+    gameHandlers.get(socketNamespace)?.({
+      socket,
+      io,
+      waitingRandomUsers,
+      waitingPrivateUsers,
+      inProgressGames,
+      socketNamespace,
+    });
+  });
+}
 
 export const connectToMongoose = async () => {
   await mongoose.connect(process.env.MONGO_URI || "");
@@ -100,21 +133,6 @@ app.use("/game", gameRouter);
 
 app.get("*", (req: Request, res: Response) => {
   res.sendFile(path.resolve(__dirname, "../../client/build", "index.html"));
-});
-
-io.of("/tic-tac-toe").on("connection", (socket: Socket) => {
-  const socketNamespace = "tic-tac-toe";
-  const waitingRandomUsers = globalWaitingRandomUsers.get(socketNamespace) || new Set();
-  const waitingPrivateUsers = globalWaitingPrivateUsers.get(socketNamespace) || new Map();
-  const inProgressGames = globalInProgressGames.get(socketNamespace) || new Map();
-  ticTacToeHandler({
-    socket,
-    io,
-    waitingRandomUsers,
-    waitingPrivateUsers,
-    inProgressGames,
-    socketNamespace,
-  });
 });
 
 server.listen(port, () => {

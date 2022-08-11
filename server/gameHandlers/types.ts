@@ -27,7 +27,8 @@ interface ClientToServerEvents {
   createPrivateGame: (userId: string, opponentId: string) => void;
   joinPrivateGame: (userId: string, userToJoin: string) => void;
   joinRoom: (gameId: string) => void;
-  move: (gameId: string, userId: string, row: number, col: number) => void;
+  move: (gameId: string, userId: string, row: number, col: number, horizontal?: boolean) => void;
+  chooseColor: (gameId: string, userId: string, color: string) => void;
 }
 
 interface InterServerEvents {

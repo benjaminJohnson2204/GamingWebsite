@@ -14,6 +14,7 @@ export default function HomePage() {
     fetch("/game-type/all")
       .then((res) => res.json())
       .then((data) => setGameTypes(data));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

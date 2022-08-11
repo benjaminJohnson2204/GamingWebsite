@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import { Game } from "../../db/models/game";
 import { IUser } from "../../db/models/user";
+import { availableColors } from "../gameHandlers/dotsAndBoxes";
 import { ensureAuthenticated } from "./auth";
 
 const router = express.Router();
@@ -13,6 +14,10 @@ router.use("*", ensureAuthenticated);
 router.get("/all", async (req: Request, res: Response) => {
   const games = await Game.find({ complete: true, userIds: (req.user as IUser)._id });
   res.status(200).json({ games: games });
+});
+
+router.get("/dots-and-boxes/colors", (req: Request, res: Response) => {
+  res.status(200).json(availableColors);
 });
 
 /**

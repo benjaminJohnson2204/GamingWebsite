@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import { globalWaitingPrivateUsers } from "..";
 import { GameType, IGameType } from "../../db/models/gameType";
 import { IUser, User } from "../../db/models/user";
+import { ensureAuthenticated } from "./auth";
 
 const router = express.Router();
 
@@ -15,7 +16,7 @@ router.get("/all", async (req: Request, res: Response) => {
   res.status(200).json(gameTypes);
 });
 
-router.get("/requests", async (req: Request, res: Response) => {
+router.get("/requests", ensureAuthenticated, async (req: Request, res: Response) => {
   const requests = [];
   const gameTypes = await GameType.find({});
   for (const gameType of gameTypes) {
