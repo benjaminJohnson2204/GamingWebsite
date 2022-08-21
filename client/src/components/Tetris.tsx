@@ -15,6 +15,12 @@ interface IActivePiece extends IPiece {
   clockwiseRotation: number;
 }
 
+interface IBoard {
+  boxes: string[][];
+  activePiece: IActivePiece | undefined;
+  nextPiece: IPiece | undefined;
+}
+
 const boxesDown = 20;
 const boxesAcross = 10;
 
@@ -121,11 +127,7 @@ export default function Tetris(props: { saveGameFunction: (score: number) => voi
     initialBoxes.push(row);
   }
 
-  const [board, setBoard] = useState<{
-    boxes: string[][];
-    nextPiece: IPiece | undefined;
-    activePiece: IActivePiece | undefined;
-  }>({
+  const [board, setBoard] = useState<IBoard>({
     boxes: initialBoxes,
     nextPiece: undefined,
     activePiece: undefined,
@@ -209,20 +211,25 @@ export default function Tetris(props: { saveGameFunction: (score: number) => voi
       .map((indices) => [indices[0] + piece!.col, indices[1] + piece!.row]);
   };
 
+  const rowsCanFall = (board: IBoard) => {
+    let result = 0;
+    let originalRow = board.activePiece!.row;
+    while (pieceCanFall(board)) {
+      board.activePiece!.row += 1;
+      result += 1;
+    }
+    board.activePiece!.row = originalRow;
+    return result;
+  };
+
   const hardDrop = () => {
-    setBoard((prevBoard) => {
-      let newBoard = prevBoard!;
-      while (pieceCanFall(newBoard)) {
-        newBoard.activePiece!.row += 1;
-      }
-      return {
-        ...prevBoard,
-        activePiece: {
-          ...prevBoard.activePiece!,
-          row: newBoard.activePiece!.row,
-        },
-      };
-    });
+    setBoard((prevBoard) => ({
+      ...prevBoard,
+      activePiece: {
+        ...prevBoard.activePiece!,
+        row: prevBoard.activePiece!.row + rowsCanFall(prevBoard),
+      },
+    }));
   };
 
   const softDrop = () => {
@@ -312,17 +319,14 @@ export default function Tetris(props: { saveGameFunction: (score: number) => voi
     }
   };
 
-  const pieceCanFall = (board: { boxes: string[][]; activePiece: IActivePiece | undefined }) => {
+  const pieceCanFall = (board: IBoard) => {
     return isValidPieceLocation({
-      boxes: board.boxes,
+      ...board,
       activePiece: { ...board.activePiece!, row: board.activePiece!.row + 1 },
     });
   };
 
-  const isValidPieceLocation = (board: {
-    boxes: string[][];
-    activePiece: IActivePiece | undefined;
-  }) => {
+  const isValidPieceLocation = (board: IBoard) => {
     for (var [col, row] of getSquaresOfPiece(board.activePiece!)) {
       if (col < 0 || col >= boxesAcross || row < 0 || row >= boxesDown || board.boxes[row][col]) {
         return false;
@@ -404,17 +408,36 @@ export default function Tetris(props: { saveGameFunction: (score: number) => voi
                     />
                   ))
                 )}
-                {board.activePiece &&
-                  getSquaresOfPiece(board.activePiece).map((indices) => (
-                    <Rect
-                      x={indices[0] * boxWidth + leftMargin}
-                      y={indices[1] * boxWidth}
-                      height={boxWidth}
-                      width={boxWidth}
-                      stroke="black"
-                      fill={board.activePiece!.color}
-                    />
-                  ))}
+                {board.activePiece && (
+                  <>
+                    {getSquaresOfPiece(board.activePiece).map((indices) => (
+                      <Rect
+                        key={indices[1] * boxesAcross + indices[0]}
+                        x={indices[0] * boxWidth + leftMargin}
+                        y={indices[1] * boxWidth}
+                        height={boxWidth}
+                        width={boxWidth}
+                        stroke="black"
+                        fill={board.activePiece!.color}
+                      />
+                    ))}
+                    {getSquaresOfPiece({
+                      ...board.activePiece!,
+                      row: board.activePiece!.row + rowsCanFall(board),
+                    }).map((square, index) => (
+                      <Rect
+                        key={index}
+                        x={square[0] * boxWidth + leftMargin}
+                        y={square[1] * boxWidth}
+                        height={boxWidth}
+                        width={boxWidth}
+                        stroke="black"
+                        opacity={0.5}
+                        fill={board.activePiece!.color}
+                      />
+                    ))}
+                  </>
+                )}
               </Layer>
             </Stage>
           </Col>
