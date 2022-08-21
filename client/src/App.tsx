@@ -9,8 +9,9 @@ import RegisterPage from "./pages/RegisterPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import WaitingRandomPage from "./pages/WaitingRandomPage";
 import WaitingPrivatePage from "./pages/WaitingPrivatePage";
-import PlayGamePage from "./pages/PlayGamePage";
+import MultiplayerGamePage from "./pages/MultiplayerGamePage";
 import GameInfoPage from "./pages/GameInfoPage";
+import SingleplayerGamePage from "./pages/SingleplayerGamePage";
 
 function App() {
   return (
@@ -27,7 +28,8 @@ function App() {
           <Route path="/waiting-random/:gameType" element={<WaitingRandomPage />} />
           <Route path="/waiting-private/:gameType/:userToJoin" element={<WaitingPrivatePage />} />
 
-          <Route path="/play/:gameType/:gameId" element={<PlayGamePage />} />
+          <Route path="/play-multi/:gameType/:gameId" element={<MultiplayerGamePage />} />
+          <Route path="/play-single/:gameType" element={<SingleplayerGamePage />} />
 
           <Route path="*" element={<NotFoundPage />} />
         </Routes>

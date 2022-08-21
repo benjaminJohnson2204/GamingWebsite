@@ -6,7 +6,7 @@ import SiteHeader from "../components/SiteHeader";
 import TicTacToe from "../components/TicTacToe";
 import useAuthenticated from "../components/useAuthenticated";
 
-export default function PlayGamePage() {
+export default function MultiplayerGamePage() {
   const user = useAuthenticated();
   const { gameType, gameId } = useParams();
   const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(`/${gameType!}`);
