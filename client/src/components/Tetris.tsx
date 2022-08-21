@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
 import { Layer, Rect, Stage } from "react-konva";
-import { IUser } from "../../../db/models/user";
 
 interface IPiece {
   letter: string;
@@ -106,9 +105,9 @@ const pieces: IPiece[] = [
   },
 ];
 
-export default function Tetris(props: { user: IUser }) {
+export default function Tetris(props: { saveGameFunction: (score: number) => void }) {
   const [begun, setBegun] = useState(false);
-  const [ended] = useState(false);
+  const [ended, setEnded] = useState(false);
   const [paused, setPaused] = useState(false);
   const [score, setScore] = useState(0);
   const [periodicSet, setPeriodicSet] = useState(false);
@@ -175,7 +174,13 @@ export default function Tetris(props: { user: IUser }) {
 
   useEffect(() => {
     if (board.activePiece && !pieceCanFall(board)) {
-      placePiece();
+      if (board.activePiece.row === 2) {
+        // End game when a just-spawned piece is on top of another piece
+        setEnded(true);
+        props.saveGameFunction(score);
+      } else {
+        placePiece();
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [board]);
@@ -185,8 +190,8 @@ export default function Tetris(props: { user: IUser }) {
       boxes: prevBoard.boxes,
       activePiece: {
         ...pieces[Math.floor(Math.random() * pieces.length)],
-        row: 1,
-        col: Math.floor(Math.random() * (boxesAcross - 3)),
+        row: 2,
+        col: Math.floor(Math.random() * (boxesAcross - 4)) + 2,
         clockwiseRotation: Math.floor(Math.random() * 4) / 4,
       },
     }));

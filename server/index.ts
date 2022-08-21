@@ -12,7 +12,7 @@ import mongoose from "mongoose";
 
 import { IUser } from "../db/models/user";
 
-import { router as authRouter } from "./routes/auth";
+import { ensureAuthenticated, router as authRouter } from "./routes/auth";
 import { router as friendsRouter } from "./routes/friends";
 import { router as gameTypesRouter } from "./routes/gameType";
 import { router as gameRouter } from "./routes/game";
@@ -127,9 +127,9 @@ passport.use(
 );
 
 app.use("/auth", authRouter);
-app.use("/friend", friendsRouter);
+app.use("/friend", ensureAuthenticated, friendsRouter);
 app.use("/game-type", gameTypesRouter);
-app.use("/game", gameRouter);
+app.use("/game", ensureAuthenticated, gameRouter);
 
 app.get("*", (req: Request, res: Response) => {
   res.sendFile(path.resolve(__dirname, "../../client/build", "index.html"));

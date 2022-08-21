@@ -30,7 +30,9 @@ export default function DotsAndBoxes(props: {
   useEffect(() => {
     window.onresize = resizeGame;
 
-    fetch("/game/dots-and-boxes/colors")
+    fetch("/game/dots-and-boxes/colors", {
+      credentials: "include",
+    })
       .then((res) => res.json())
       .then((data) => setAvailableColors(data));
     // eslint-disable-next-line react-hooks/exhaustive-deps

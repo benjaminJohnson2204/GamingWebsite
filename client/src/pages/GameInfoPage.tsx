@@ -72,7 +72,7 @@ export default function GameInfoPage() {
             <Container fluid>
               <Row>
                 <Col xs={12}>
-                  <Button as="a" href={`/play/${gameType}`}>
+                  <Button as="a" href={`/play-single/${gameType}`}>
                     Play now!
                   </Button>
                 </Col>

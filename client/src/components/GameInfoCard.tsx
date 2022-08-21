@@ -32,7 +32,7 @@ export default function GameInfoCard(props: { isAuthenticated: boolean; gameType
               <ChallengeFriend gameType={props.gameType.socketNamespace} />
             </>
           ) : (
-            <Button as="a" href={`/play/${props.gameType.socketNamespace}`}>
+            <Button as="a" href={`/play-single/${props.gameType.socketNamespace}`}>
               Play now!
             </Button>
           )

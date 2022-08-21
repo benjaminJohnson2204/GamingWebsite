@@ -72,7 +72,7 @@ router.post("/logout", (req: Request, res: Response) => {
  * Delete account (mainly used for cleanup of tests)
  * Also logs out to avoid errors from being logged in to a nonexistent account
  */
-router.delete("/delete", async (req: Request, res: Response) => {
+router.delete("/delete", ensureAuthenticated, async (req: Request, res: Response) => {
   await User.deleteOne({ _id: (req.user as IUser)._id });
   req.logout({}, (error) => {
     if (error) {
