@@ -54,19 +54,57 @@ const pieces: IPiece[] = [
       [1, 1],
     ],
   },
+  {
+    letter: "t",
+    color: "purple",
+    squares: [
+      [0, 0],
+      [0, -1],
+      [-1, 0],
+      [1, 0],
+    ],
+  },
+  {
+    letter: "j",
+    color: "blue",
+    squares: [
+      [0, 0],
+      [0, -1],
+      [0, 1],
+      [-1, 1],
+    ],
+  },
+  {
+    letter: "l",
+    color: "orange",
+    squares: [
+      [0, 0],
+      [0, -1],
+      [0, 1],
+      [1, 1],
+    ],
+  },
+  {
+    letter: "s",
+    color: "green",
+    squares: [
+      [0, 0],
+      [0, -1],
+      [-1, 0],
+      [1, -1],
+    ],
+  },
+  {
+    letter: "z",
+    color: "red",
+    squares: [
+      [0, 0],
+      [0, -1],
+      [1, 0],
+      [-1, -1],
+    ],
+  },
 ];
-
-// const pieces = ["i", "o", "t", "j", "l", "s", "z"];
-
-// const piecesToColors = new Map<string, string>([
-//   ["i", "cyan"],
-//   ["o", "yellow"],
-//   ["t", "purple"],
-//   ["j", "blue"],
-//   ["l", "orange"],
-//   ["s", "green"],
-//   ["z", "red"],
-// ]);
 
 export default function Tetris(props: { user: IUser }) {
   const [begun, setBegun] = useState(false);
