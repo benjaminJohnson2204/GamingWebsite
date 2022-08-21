@@ -84,7 +84,7 @@ const pieces: IPiece[] = [
 
 export default function Tetris(props: { user: IUser }) {
   const [begun, setBegun] = useState(false);
-  const [ended, setEnded] = useState(false);
+  const [ended] = useState(false);
   const [paused, setPaused] = useState(false);
   const [score, setScore] = useState(0);
   const [periodicSet, setPeriodicSet] = useState(false);
@@ -111,6 +111,7 @@ export default function Tetris(props: { user: IUser }) {
       setTimeout(periodicFall, gameSpeed);
       setPeriodicSet(true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [begun, paused]);
 
   useEffect(() => {
@@ -142,12 +143,14 @@ export default function Tetris(props: { user: IUser }) {
           break;
       }
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [begun]);
 
   useEffect(() => {
     if (activePiece && !pieceCanFall(activePiece)) {
       placePiece(activePiece);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activePiece]);
 
   const generateNewActivePiece = () => {
