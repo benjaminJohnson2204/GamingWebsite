@@ -6,10 +6,11 @@ import { IUser } from "../../../db/models/user";
 interface IPiece {
   letter: string;
   color: string;
-  rotationToSquares: Map<number, number[][]>;
+  squares: number[][];
 }
 
 interface IActivePiece extends IPiece {
+  // Row and col of center of piece
   row: number;
   col: number;
   clockwiseRotation: number;
@@ -25,48 +26,33 @@ const rowsToPoints = new Map<number, number>([
   [4, 8],
 ]);
 
+const rotationsToTransformations = new Map<number, (coordinates: number[]) => number[]>([
+  [0, (coordinates) => coordinates],
+  [0.25, (coordinates) => [coordinates[1], -coordinates[0]]],
+  [0.5, (coordinates) => [-coordinates[0], -coordinates[1]]],
+  [0.75, (coordinates) => [-coordinates[1], coordinates[0]]],
+]);
+
 const pieces: IPiece[] = [
   {
     letter: "i",
     color: "cyan",
-    rotationToSquares: new Map([
-      [
-        0,
-        [
-          [0, 0],
-          [0, 1],
-          [0, 2],
-          [0, 3],
-        ],
-      ],
-      [
-        0.25,
-        [
-          [0, 0],
-          [1, 0],
-          [2, 0],
-          [3, 0],
-        ],
-      ],
-      [
-        0.5,
-        [
-          [0, 0],
-          [0, 1],
-          [0, 2],
-          [0, 3],
-        ],
-      ],
-      [
-        0.75,
-        [
-          [0, 0],
-          [1, 0],
-          [2, 0],
-          [3, 0],
-        ],
-      ],
-    ]),
+    squares: [
+      [0, -1],
+      [0, 0],
+      [0, 1],
+      [0, 2],
+    ],
+  },
+  {
+    letter: "o",
+    color: "yellow",
+    squares: [
+      [0, 0],
+      [0, 1],
+      [1, 0],
+      [1, 1],
+    ],
   },
 ];
 
@@ -161,7 +147,7 @@ export default function Tetris(props: { user: IUser }) {
       boxes: prevBoard.boxes,
       activePiece: {
         ...pieces[Math.floor(Math.random() * pieces.length)],
-        row: 0,
+        row: 1,
         col: Math.floor(Math.random() * (boxesAcross - 3)),
         clockwiseRotation: Math.floor(Math.random() * 4) / 4,
       },
@@ -169,8 +155,8 @@ export default function Tetris(props: { user: IUser }) {
   };
 
   const getSquaresOfPiece = (piece: IActivePiece) => {
-    return piece!.rotationToSquares
-      .get(piece!.clockwiseRotation)!
+    return piece!.squares
+      .map((square) => rotationsToTransformations.get(piece!.clockwiseRotation)!(square))
       .map((indices) => [indices[0] + piece!.col, indices[1] + piece!.row]);
   };
 
@@ -206,56 +192,66 @@ export default function Tetris(props: { user: IUser }) {
 
   const shiftLeft = () => {
     setBoard((prevBoard) => {
-      for (const [col, row] of getSquaresOfPiece(prevBoard.activePiece!)) {
-        if (col === 0 || prevBoard.boxes[row][col - 1] !== "") {
-          return prevBoard;
-        }
-      }
-      return {
+      const tryShiftingBoard = {
         boxes: prevBoard.boxes,
         activePiece: {
           ...prevBoard.activePiece!,
           col: prevBoard.activePiece!.col - 1,
         },
       };
+      if (isValidPieceLocation(tryShiftingBoard)) {
+        return tryShiftingBoard;
+      }
+      return prevBoard;
     });
   };
 
   const shiftRight = () => {
     setBoard((prevBoard) => {
-      for (const [col, row] of getSquaresOfPiece(prevBoard.activePiece!)) {
-        if (col === boxesAcross - 1 || prevBoard.boxes[row][col + 1] !== "") {
-          return prevBoard;
-        }
-      }
-      return {
+      const tryShiftingBoard = {
         boxes: prevBoard.boxes,
         activePiece: {
           ...prevBoard.activePiece!,
           col: prevBoard.activePiece!.col + 1,
         },
       };
+      if (isValidPieceLocation(tryShiftingBoard)) {
+        return tryShiftingBoard;
+      }
+      return prevBoard;
     });
   };
 
   const rotateClockwise = () => {
-    setBoard((prevBoard) => ({
-      boxes: prevBoard.boxes,
-      activePiece: {
-        ...prevBoard.activePiece!,
-        clockwiseRotation: (prevBoard.activePiece!.clockwiseRotation + 0.25) % 1,
-      },
-    }));
+    setBoard((prevBoard) => {
+      const tryRotatingBoard = {
+        boxes: prevBoard.boxes,
+        activePiece: {
+          ...prevBoard.activePiece!,
+          clockwiseRotation: (prevBoard.activePiece!.clockwiseRotation + 0.25) % 1,
+        },
+      };
+      if (isValidPieceLocation(tryRotatingBoard)) {
+        return tryRotatingBoard;
+      }
+      return prevBoard;
+    });
   };
 
   const rotateCounterClockwise = () => {
-    setBoard((prevBoard) => ({
-      boxes: prevBoard.boxes,
-      activePiece: {
-        ...prevBoard.activePiece!,
-        clockwiseRotation: (prevBoard.activePiece!.clockwiseRotation + 0.75) % 1,
-      },
-    }));
+    setBoard((prevBoard) => {
+      const tryRotatingBoard = {
+        boxes: prevBoard.boxes,
+        activePiece: {
+          ...prevBoard.activePiece!,
+          clockwiseRotation: (prevBoard.activePiece!.clockwiseRotation + 0.75) % 1,
+        },
+      };
+      if (isValidPieceLocation(tryRotatingBoard)) {
+        return tryRotatingBoard;
+      }
+      return prevBoard;
+    });
   };
 
   const periodicFall = () => {
@@ -268,8 +264,18 @@ export default function Tetris(props: { user: IUser }) {
   };
 
   const pieceCanFall = (board: { boxes: string[][]; activePiece: IActivePiece | undefined }) => {
+    return isValidPieceLocation({
+      boxes: board.boxes,
+      activePiece: { ...board.activePiece!, row: board.activePiece!.row + 1 },
+    });
+  };
+
+  const isValidPieceLocation = (board: {
+    boxes: string[][];
+    activePiece: IActivePiece | undefined;
+  }) => {
     for (var [col, row] of getSquaresOfPiece(board.activePiece!)) {
-      if (row === boxesDown - 1 || board.boxes[row + 1][col] !== "") {
+      if (col < 0 || col >= boxesAcross || row < 0 || row >= boxesDown || board.boxes[row][col]) {
         return false;
       }
     }
@@ -279,8 +285,8 @@ export default function Tetris(props: { user: IUser }) {
   const placePiece = () => {
     setBoard((prevBoard) => {
       const newBoard = prevBoard;
-      for (var [col, row] of getSquaresOfPiece(board.activePiece!)) {
-        newBoard.boxes[row][col] = board.activePiece!.letter;
+      for (var [col, row] of getSquaresOfPiece(prevBoard.activePiece!)) {
+        newBoard.boxes[row][col] = prevBoard.activePiece!.letter;
       }
       return newBoard;
     });
