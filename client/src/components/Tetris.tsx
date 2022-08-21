@@ -121,8 +121,13 @@ export default function Tetris(props: { saveGameFunction: (score: number) => voi
     initialBoxes.push(row);
   }
 
-  const [board, setBoard] = useState<{ boxes: string[][]; activePiece: IActivePiece | undefined }>({
+  const [board, setBoard] = useState<{
+    boxes: string[][];
+    nextPiece: IPiece | undefined;
+    activePiece: IActivePiece | undefined;
+  }>({
     boxes: initialBoxes,
+    nextPiece: undefined,
     activePiece: undefined,
   });
 
@@ -189,11 +194,12 @@ export default function Tetris(props: { saveGameFunction: (score: number) => voi
     setBoard((prevBoard) => ({
       boxes: prevBoard.boxes,
       activePiece: {
-        ...pieces[Math.floor(Math.random() * pieces.length)],
+        ...(prevBoard.nextPiece || pieces[Math.floor(Math.random() * pieces.length)]),
         row: 2,
         col: Math.floor(Math.random() * (boxesAcross - 4)) + 2,
         clockwiseRotation: Math.floor(Math.random() * 4) / 4,
       },
+      nextPiece: pieces[Math.floor(Math.random() * pieces.length)],
     }));
   };
 
@@ -210,7 +216,7 @@ export default function Tetris(props: { saveGameFunction: (score: number) => voi
         newBoard.activePiece!.row += 1;
       }
       return {
-        boxes: prevBoard.boxes,
+        ...prevBoard,
         activePiece: {
           ...prevBoard.activePiece!,
           row: newBoard.activePiece!.row,
@@ -223,7 +229,7 @@ export default function Tetris(props: { saveGameFunction: (score: number) => voi
     setBoard((prevBoard) =>
       pieceCanFall(prevBoard)
         ? {
-            boxes: prevBoard.boxes,
+            ...prevBoard,
             activePiece: {
               ...prevBoard.activePiece!,
               row: prevBoard.activePiece!.row + 1,
@@ -236,7 +242,7 @@ export default function Tetris(props: { saveGameFunction: (score: number) => voi
   const shiftLeft = () => {
     setBoard((prevBoard) => {
       const tryShiftingBoard = {
-        boxes: prevBoard.boxes,
+        ...prevBoard,
         activePiece: {
           ...prevBoard.activePiece!,
           col: prevBoard.activePiece!.col - 1,
@@ -252,7 +258,7 @@ export default function Tetris(props: { saveGameFunction: (score: number) => voi
   const shiftRight = () => {
     setBoard((prevBoard) => {
       const tryShiftingBoard = {
-        boxes: prevBoard.boxes,
+        ...prevBoard,
         activePiece: {
           ...prevBoard.activePiece!,
           col: prevBoard.activePiece!.col + 1,
@@ -268,7 +274,7 @@ export default function Tetris(props: { saveGameFunction: (score: number) => voi
   const rotateClockwise = () => {
     setBoard((prevBoard) => {
       const tryRotatingBoard = {
-        boxes: prevBoard.boxes,
+        ...prevBoard,
         activePiece: {
           ...prevBoard.activePiece!,
           clockwiseRotation: (prevBoard.activePiece!.clockwiseRotation + 0.25) % 1,
@@ -284,7 +290,7 @@ export default function Tetris(props: { saveGameFunction: (score: number) => voi
   const rotateCounterClockwise = () => {
     setBoard((prevBoard) => {
       const tryRotatingBoard = {
-        boxes: prevBoard.boxes,
+        ...prevBoard,
         activePiece: {
           ...prevBoard.activePiece!,
           clockwiseRotation: (prevBoard.activePiece!.clockwiseRotation + 0.75) % 1,
@@ -415,6 +421,30 @@ export default function Tetris(props: { saveGameFunction: (score: number) => voi
           <Col xs={12} md={4}>
             {begun ? (
               <>
+                <h2>Next</h2>
+                <Stage height={window.innerHeight / 4} width={window.innerWidth / 6}>
+                  <Layer>
+                    <Rect
+                      x={window.innerWidth / 12}
+                      y={0}
+                      height={window.innerHeight / 4}
+                      width={window.innerWidth / 12}
+                      stroke="black"
+                    />
+                    {board.nextPiece &&
+                      board.nextPiece.squares.map((square, index) => (
+                        <Rect
+                          key={index}
+                          x={window.innerWidth / 12 + (square[0] + 2) * boxWidth}
+                          y={(square[1] + 2) * boxWidth}
+                          height={boxWidth}
+                          width={boxWidth}
+                          stroke="black"
+                          fill={board.nextPiece!.color}
+                        />
+                      ))}
+                  </Layer>
+                </Stage>
                 <h2 className="m-3">Score: {score}</h2>
                 {paused && (
                   <>
