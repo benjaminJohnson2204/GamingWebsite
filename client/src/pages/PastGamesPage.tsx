@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import SiteHeader from "../components/SiteHeader";
 import useAuthenticated from "../components/useAuthenticated";
-import { useNavigate } from "react-router";
 import { IGame } from "../../../db/models/game";
 import { IGameType } from "../../../db/models/gameType";
 import mongoose from "mongoose";
