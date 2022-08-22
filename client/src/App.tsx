@@ -12,6 +12,7 @@ import WaitingPrivatePage from "./pages/WaitingPrivatePage";
 import MultiplayerGamePage from "./pages/MultiplayerGamePage";
 import GameInfoPage from "./pages/GameInfoPage";
 import SingleplayerGamePage from "./pages/SingleplayerGamePage";
+import PastGamesPage from "./pages/PastGamesPage";
 
 function App() {
   return (
@@ -30,6 +31,8 @@ function App() {
 
           <Route path="/play-multi/:gameType/:gameId" element={<MultiplayerGamePage />} />
           <Route path="/play-single/:gameType" element={<SingleplayerGamePage />} />
+
+          <Route path="/past-games" element={<PastGamesPage />} />
 
           <Route path="*" element={<NotFoundPage />} />
         </Routes>

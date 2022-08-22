@@ -53,8 +53,13 @@ export default function SiteHeader(props: { isAuthenticated: boolean; reloadFrie
           <Navbar.Toggle aria-controls="navbar" />
           <Navbar.Collapse id="navbar">
             <Nav className="me-auto">
-              <Navbar.Brand href="/about">About</Navbar.Brand>
-              <Navbar.Brand href="/contact">Contact</Navbar.Brand>
+              <Navbar.Brand
+                href="https://github.com/benjaminJohnson2204/GamingWebsite"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                View Source Code
+              </Navbar.Brand>
             </Nav>
           </Navbar.Collapse>
 
@@ -71,10 +76,9 @@ export default function SiteHeader(props: { isAuthenticated: boolean; reloadFrie
                     </>
                   }
                   show={dropdownVisible}
-                  onMouseOver={() => setDropdownVisible(true)}
-                  onMouseLeave={() => setDropdownVisible(false)}
+                  onClick={() => setDropdownVisible((visible) => !visible)}
                 >
-                  <NavDropdown.Item href="/profile">Profile</NavDropdown.Item>
+                  <NavDropdown.Item href="/past-games">Past Games</NavDropdown.Item>
                   <NavDropdown.Item href="/friends">
                     Friends{" "}
                     {incomingFriendRequests > 0 && (
