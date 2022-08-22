@@ -115,8 +115,9 @@ export default function Tetris(props: { saveGameFunction: (score: number) => voi
   const [begun, setBegun] = useState(false);
   const [ended, setEnded] = useState(false);
   const [paused, setPaused] = useState(false);
+  const [keypressEvent, setKeypressEvent] = useState<KeyboardEvent>();
   const [score, setScore] = useState(0);
-  const [periodicSet, setPeriodicSet] = useState(false);
+  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout>();
 
   const initialBoxes: string[][] = [];
   for (let i = 0; i < boxesDown; i++) {
@@ -140,44 +141,15 @@ export default function Tetris(props: { saveGameFunction: (score: number) => voi
   const leftMargin = ((window.innerWidth * 2) / 3 - boxesAcross * boxWidth) / 2;
 
   useEffect(() => {
-    if (begun && !paused && !periodicSet) {
-      setTimeout(periodicFall, gameSpeed);
-      setPeriodicSet(true);
+    if (paused) {
+      clearTimeout(timeoutId);
+      setTimeoutId(undefined);
+    }
+    if (begun && !paused && !timeoutId) {
+      setTimeoutId(setTimeout(periodicFall, gameSpeed));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [begun, paused]);
-
-  useEffect(() => {
-    document.addEventListener("keydown", (event) => {
-      if (paused || ended || !begun) return;
-
-      switch (event.key) {
-        case "ArrowLeft":
-          shiftLeft();
-          break;
-        case "ArrowRight":
-          shiftRight();
-          break;
-        case "ArrowUp":
-          rotateClockwise();
-          break;
-        case "ArrowDown":
-          softDrop();
-          break;
-        case " ":
-          hardDrop();
-          break;
-        case "z":
-          rotateCounterClockwise();
-          break;
-        case "Escape":
-          clearTimeout();
-          setPaused(true);
-          break;
-      }
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [begun]);
 
   useEffect(() => {
     if (board.activePiece && !pieceCanFall(board)) {
@@ -191,6 +163,35 @@ export default function Tetris(props: { saveGameFunction: (score: number) => voi
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [board]);
+
+  useEffect(() => document.addEventListener("keydown", setKeypressEvent), []);
+
+  useEffect(() => {
+    if (!keypressEvent || ended || !begun) return;
+    if (keypressEvent.key === "Escape") setPaused((prevPaused) => !prevPaused);
+    if (paused) return;
+    switch (keypressEvent.key) {
+      case "ArrowLeft":
+        shiftLeft();
+        break;
+      case "ArrowRight":
+        shiftRight();
+        break;
+      case "ArrowUp":
+        rotateClockwise();
+        break;
+      case "ArrowDown":
+        softDrop();
+        break;
+      case " ":
+        hardDrop();
+        break;
+      case "z":
+        rotateCounterClockwise();
+        break;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [keypressEvent]);
 
   const generateNewActivePiece = () => {
     setBoard((prevBoard) => ({
@@ -315,7 +316,7 @@ export default function Tetris(props: { saveGameFunction: (score: number) => voi
       if (board.activePiece) {
         softDrop();
       }
-      setTimeout(periodicFall, gameSpeed);
+      setTimeoutId(setTimeout(periodicFall, gameSpeed));
     }
   };
 
@@ -474,7 +475,6 @@ export default function Tetris(props: { saveGameFunction: (score: number) => voi
                     <h3 className="m-3">Paused</h3>
                     <Button
                       onClick={() => {
-                        setPeriodicSet(false);
                         setPaused(false);
                       }}
                     >
@@ -486,7 +486,6 @@ export default function Tetris(props: { saveGameFunction: (score: number) => voi
             ) : (
               <Button
                 onClick={() => {
-                  setPeriodicSet(false);
                   setBegun(true);
                   generateNewActivePiece();
                 }}
