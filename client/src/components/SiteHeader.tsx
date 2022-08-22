@@ -41,7 +41,7 @@ export default function SiteHeader(props: { isAuthenticated: boolean; reloadFrie
     socket.emit("joinPrivateGame", user!._id.toString(), request.opponent._id.toString());
 
     socket.on("joinedGame", (game) => {
-      navigate(`/play/${request.gameType.socketNamespace}/${game._id}`);
+      navigate(`/play-multi/${request.gameType.socketNamespace}/${game._id}`);
     });
   };
 

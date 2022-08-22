@@ -16,7 +16,7 @@ export default function WaitingRandomPage() {
       socket.emit("joinRandomGame", user._id.toString());
 
       socket.on("joinedGame", (game) => {
-        navigate(`/play/${gameType}/${game._id}`);
+        navigate(`/play-multi/${gameType}/${game._id}`);
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -16,7 +16,7 @@ export default function WaitingPrivatePage() {
       socket.emit("createPrivateGame", user._id.toString(), userToJoin!);
 
       socket.on("joinedGame", async (game) => {
-        navigate(`/play/${gameType}/${game._id}`);
+        navigate(`/play-multi/${gameType}/${game._id}`);
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
