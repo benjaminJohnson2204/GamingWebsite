@@ -111,12 +111,16 @@ const pieces: IPiece[] = [
   },
 ];
 
-export default function Tetris(props: { saveGameFunction: (score: number) => void }) {
+export default function Tetris(props: {
+  saveGameFunction: (score: number) => void;
+  getHighScore: () => Promise<number>;
+}) {
   const [begun, setBegun] = useState(false);
   const [ended, setEnded] = useState(false);
   const [paused, setPaused] = useState(false);
   const [keypressEvent, setKeypressEvent] = useState<KeyboardEvent>();
   const [score, setScore] = useState(0);
+  const [highScore, setHighScore] = useState(0);
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout>();
 
   const initialBoxes: string[][] = [];
@@ -164,7 +168,10 @@ export default function Tetris(props: { saveGameFunction: (score: number) => voi
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [board]);
 
-  useEffect(() => document.addEventListener("keydown", setKeypressEvent), []);
+  useEffect(() => {
+    props.getHighScore().then((score) => setHighScore(score));
+    document.addEventListener("keydown", setKeypressEvent);
+  }, []);
 
   useEffect(() => {
     if (!keypressEvent || ended || !begun) return;
@@ -470,6 +477,7 @@ export default function Tetris(props: { saveGameFunction: (score: number) => voi
                   </Layer>
                 </Stage>
                 <h2 className="m-3">Score: {score}</h2>
+                <h3 className="m-3">High score: {highScore}</h3>
                 {paused && (
                   <>
                     <h3 className="m-3">Paused</h3>

@@ -21,8 +21,21 @@ export default function SingleplayerGamePage() {
     });
   };
 
+  const getHighScore = (gameTypeNamespace: string) => {
+    return fetch(`/game-type/${gameTypeNamespace}`)
+      .then((res) => res.json())
+      .then((gameType) =>
+        fetch(`/game/high-score/${gameType._id}`, {
+          credentials: "include",
+        }).then((res) => res.json())
+      );
+  };
+
   const gameTypesToComponents = new Map<string, JSX.Element>();
-  gameTypesToComponents.set("tetris", <Tetris saveGameFunction={saveGameFunction} />);
+  gameTypesToComponents.set(
+    "tetris",
+    <Tetris saveGameFunction={saveGameFunction} getHighScore={() => getHighScore("tetris")} />
+  );
 
   return (
     <div>

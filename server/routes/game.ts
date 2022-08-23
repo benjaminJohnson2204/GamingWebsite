@@ -34,6 +34,18 @@ router.get("/:gameTypeId", async (req: Request, res: Response) => {
   res.status(200).json({ games: games });
 });
 
+router.get("/high-score/:gameTypeId", async (req: Request, res: Response) => {
+  const highScore = await Game.findOne({
+    complete: true,
+    type: req.params.gameTypeId,
+    userIds: (req.user as IUser)._id,
+  }).sort({ score: -1 });
+  if (!highScore) {
+    return res.status(200).json(0);
+  }
+  res.status(200).json(highScore.score);
+});
+
 router.post("/add", async (req: Request, res: Response) => {
   const gameType = await GameType.findOne({
     socketNamespace: req.body.gameType,

@@ -59,7 +59,7 @@ export default function PastGamesPage() {
                   <td>{game.usernames.filter((username) => username !== user!.username)}</td>
                   <td>
                     {game.winner
-                      ? game.winner._id === user!._id
+                      ? game.winner === user!._id
                         ? user!.username
                         : game.usernames.filter((username) => username !== user!.username)
                       : "tie"}

@@ -101,4 +101,30 @@ describe("Game Tests", () => {
       });
     });
   });
+
+  it("Add another game", (done) => {
+    agent
+      .post("/game/add")
+      .send({
+        gameType: "tic-tac-toe",
+        score: 3,
+      })
+      .end((err, res) => {
+        assert.isNull(err);
+        assert.equal(res.status, 200);
+        assert.equal(res.body.game.score, 3);
+        done();
+      });
+  });
+
+  it("Get high score", (done) => {
+    agent.get("/game-type/tic-tac-toe").end((err, res) => {
+      agent.get(`/game/high-score/${res.body._id}`).end((err, res) => {
+        assert.isNull(err);
+        assert.equal(res.status, 200);
+        assert.equal(res.body, 10);
+        done();
+      });
+    });
+  });
 });
