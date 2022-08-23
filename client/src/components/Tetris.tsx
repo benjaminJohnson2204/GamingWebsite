@@ -171,6 +171,7 @@ export default function Tetris(props: {
   useEffect(() => {
     props.getHighScore().then((score) => setHighScore(score));
     document.addEventListener("keydown", setKeypressEvent);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

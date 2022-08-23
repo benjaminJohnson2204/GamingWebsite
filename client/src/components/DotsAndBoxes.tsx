@@ -19,12 +19,10 @@ export default function DotsAndBoxes(props: {
   gameId: string;
 }) {
   const [game, setGame] = useState<DotsAndBoxesGame>();
-  const [stageWidth, setStageWidth] = useState(0);
   const [lengths, setLengths] = useState<IDimensions>();
   const [selectedDotIndicies, setSelectedDotIndices] = useState({ row: -1, col: -1 });
   const [mousePosition, setMousePosition] = useState({ x: -1, y: -1 });
   const [mouseOffset, setMouseOffset] = useState({ x: -1, y: -1 });
-  const [container, setContainer] = useState<HTMLElement>();
   const [availableColors, setAvailableColors] = useState<string[]>();
 
   useEffect(() => {
@@ -56,14 +54,16 @@ export default function DotsAndBoxes(props: {
 
   const resizeGame = () => {
     if (game) {
-      const boxWidth = ((container?.offsetWidth || 0) * 0.9) / game.boxes[0].length;
+      const boxWidth = Math.min(
+        (window.innerWidth * 0.75) / game.boxes[0].length,
+        (window.innerHeight * 0.8) / game.boxes.length
+      );
       setLengths({
         boxWidth: boxWidth,
         boxHeight: boxWidth,
-        dotRadius: boxWidth / 8,
+        dotRadius: boxWidth / 6,
         lineThickness: boxWidth / 8,
       });
-      setStageWidth(container?.offsetWidth || 0);
     }
   };
 
@@ -79,11 +79,13 @@ export default function DotsAndBoxes(props: {
             radius={_lengths.dotRadius}
             fill="black"
             onMouseDown={(event) => {
-              setSelectedDotIndices({ row: i, col: j });
-              setMouseOffset({
-                x: event.evt.clientX - (_lengths.dotRadius + j * _lengths.boxWidth),
-                y: event.evt.clientY - (_lengths.dotRadius + i * _lengths.boxHeight),
-              });
+              if (game!.turn === props.user._id) {
+                setSelectedDotIndices({ row: i, col: j });
+                setMouseOffset({
+                  x: event.evt.clientX - (_lengths.dotRadius + j * _lengths.boxWidth),
+                  y: event.evt.clientY - (_lengths.dotRadius + i * _lengths.boxHeight),
+                });
+              }
             }}
             onMouseUp={() => {
               if (
@@ -161,7 +163,7 @@ export default function DotsAndBoxes(props: {
       <h2>{!game.complete && (props.user._id === game.turn ? "Your turn" : "Opponent's turn")}</h2>
       <Container fluid>
         <Row>
-          <Col xs={12} sm={4} md={3}>
+          <Col xs={12} md={2}>
             {game.winner === props.user._id && <h2>Winner!</h2>}
             <h1>{props.user.username} (you)</h1>
             <Form>
@@ -191,19 +193,13 @@ export default function DotsAndBoxes(props: {
               </Form.Group>
             </Form>
           </Col>
-          <Col
-            xs={12}
-            sm={8}
-            md={6}
-            id="game-container"
-            ref={(node: HTMLElement) => setContainer(node)}
-          >
+          <Col xs={12} md={8}>
             {game.complete && !game.winner && <h2>It's a tie!</h2>}
             <Container
               fluid
               onMouseMove={(event) => setMousePosition({ x: event.clientX, y: event.clientY })}
             >
-              <Stage width={stageWidth} height={window.innerHeight}>
+              <Stage width={window.innerWidth * 0.75} height={window.innerHeight}>
                 <Layer>
                   {game.boxes.map((row, rowIndex) =>
                     row.map(
@@ -292,7 +288,7 @@ export default function DotsAndBoxes(props: {
               </Stage>
             </Container>
           </Col>
-          <Col xs={12} sm={4} md={3}>
+          <Col xs={12} md={2}>
             {game.userIds.includes(game.winner) && game.winner !== props.user._id && (
               <h2>Winner!</h2>
             )}
