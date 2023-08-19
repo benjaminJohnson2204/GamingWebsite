@@ -79,7 +79,7 @@ function LoginPage(props: { cookies: Cookies }) {
               </ReactBootstrapForm.Group>
 
               <Button className="m-3" disabled={isSubmitting} type="submit">
-                Login
+                Submit
               </Button>
             </Form>
           )}

@@ -26,7 +26,7 @@ export default function ChallengeFriend(props: { gameType: string }) {
     <>
       <Form onSubmit={challengeFriend}>
         <Form.Group>
-          <Form.Label>Challenge a friend</Form.Label>
+          <Form.Label classname="mr-2">Challenge a friend</Form.Label>
           <Form.Select>
             <option value=""></option>
             {friends &&
@@ -35,7 +35,9 @@ export default function ChallengeFriend(props: { gameType: string }) {
               ))}
           </Form.Select>
         </Form.Group>
-        <Button type="submit">Send challenge!</Button>
+        <Button variant="success" type="submit">
+          Send challenge!
+        </Button>
       </Form>
     </>
   );

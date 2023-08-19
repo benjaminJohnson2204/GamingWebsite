@@ -58,7 +58,7 @@ export default function SiteHeader(props: { isAuthenticated: boolean; reloadFrie
                 rel="noopener noreferrer"
                 target="_blank"
               >
-                View Source Code
+                Source Code
               </Navbar.Brand>
             </Nav>
           </Navbar.Collapse>
@@ -69,7 +69,7 @@ export default function SiteHeader(props: { isAuthenticated: boolean; reloadFrie
                 <NavDropdown
                   title={
                     <>
-                      Profile{" "}
+                      {user?.username ?? "Profile"}{" "}
                       {incomingFriendRequests > 0 && (
                         <Badge bg="danger">{incomingFriendRequests}</Badge>
                       )}

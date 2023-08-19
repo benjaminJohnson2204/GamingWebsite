@@ -131,7 +131,7 @@ export default function FriendsPage() {
               )}
             </Col>
 
-            <Col xs={12} md={6}>
+            <Col xs={11} md={5}>
               <>
                 <h1>Friend Requests</h1>
                 <Row>
@@ -173,7 +173,7 @@ export default function FriendsPage() {
                   </Col>
                 </Row>
 
-                <h2>Add a Friend</h2>
+                <h2 className="mt-4">Add a Friend</h2>
                 <Form onSubmit={searchForUser}>
                   <Form.Control
                     name="search"
@@ -182,13 +182,13 @@ export default function FriendsPage() {
                     className="me-2"
                     aria-label="Search"
                   />
-                  <Button variant="outline-secondary" type="submit">
+                  <Button className="mt-2" variant="outline-secondary" type="submit">
                     Search
                   </Button>
                 </Form>
                 <Container fluid>
                   {users.map((user) => (
-                    <Row>
+                    <Row className="mt-2">
                       <Col>{user.user.username}</Col>
                       {user.friends ? (
                         <>
@@ -202,24 +202,32 @@ export default function FriendsPage() {
                           </Col>
                         </>
                       ) : user.requested ? (
-                        <Button onClick={() => cancelFriendRequest(user.user._id)} variant="danger">
-                          Cancel
-                        </Button>
-                      ) : user.requesting ? (
-                        <>
+                        <Col>
                           <Button
-                            onClick={() => acceptFriendRequest(user.user._id)}
-                            variant="success"
-                          >
-                            Accept
-                          </Button>
-                          <Button
-                            onClick={() => declineFriendRequest(user.user._id)}
+                            onClick={() => cancelFriendRequest(user.user._id)}
                             variant="danger"
                           >
-                            Decline
+                            Cancel
                           </Button>
-                        </>
+                        </Col>
+                      ) : user.requesting ? (
+                        <Col>
+                          <Row>
+                            <Button
+                              onClick={() => acceptFriendRequest(user.user._id)}
+                              variant="success"
+                            >
+                              Accept
+                            </Button>
+                            <Button
+                              className="ml-2"
+                              onClick={() => declineFriendRequest(user.user._id)}
+                              variant="danger"
+                            >
+                              Decline
+                            </Button>
+                          </Row>
+                        </Col>
                       ) : (
                         <Col>
                           <Button onClick={() => addFriend(user.user._id)}>Add</Button>

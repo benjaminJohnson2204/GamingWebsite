@@ -141,7 +141,7 @@ export default function Tetris(props: {
   const initialGameSpeed = 1000; // Time in milliseconds for piece to fall 1 grid square
   const [gameSpeed, setGameSpeed] = useState(initialGameSpeed);
 
-  const boxWidth = window.innerHeight / 25;
+  const boxWidth = (window.innerHeight - 100) / 25;
   const leftMargin = ((window.innerWidth * 2) / 3 - boxesAcross * boxWidth) / 2;
 
   useEffect(() => {
@@ -398,7 +398,7 @@ export default function Tetris(props: {
       <Container fluid>
         <Row>
           <Col xs={12} md={8}>
-            <Stage width={(window.innerWidth * 2) / 3} height={window.innerHeight}>
+            <Stage width={(window.innerWidth * 2) / 3} height={window.innerHeight - 100}>
               <Layer>
                 {board.boxes.map((row, rowIndex) =>
                   row.map((square, colIndex) => (

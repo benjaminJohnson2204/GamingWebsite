@@ -116,7 +116,7 @@ function RegisterPage(props: { cookies: Cookies }) {
               </ReactBootstrapForm.Group>
 
               <Button className="m-3" disabled={isSubmitting} type="submit">
-                Register
+                Submit
               </Button>
             </Form>
           )}

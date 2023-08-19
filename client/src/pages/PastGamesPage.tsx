@@ -27,21 +27,13 @@ export default function PastGamesPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (!games || !typeIdsToTypes) {
-    return (
-      <div>
-        <SiteHeader isAuthenticated={true} />
-        <h1>Loading...</h1>
-      </div>
-    );
-  }
   return (
     <div>
       <SiteHeader isAuthenticated={true} />
 
       <Container fluid className="m-4 justify-content-center">
-        <h1>Your games</h1>
-        <h2>Multiplayer</h2>
+        <h1 className="text-center">Your games</h1>
+        <h2 className="my-2">Multiplayer</h2>
         <Table bordered hover>
           <thead>
             <tr>
@@ -51,25 +43,33 @@ export default function PastGamesPage() {
             </tr>
           </thead>
           <tbody>
-            {games
-              .filter((game) => typeIdsToTypes!.get(game.type)!.numPlayers > 1)
-              .map((game) => (
-                <tr>
-                  <td>{typeIdsToTypes!.get(game.type)!.name}</td>
-                  <td>{game.usernames.filter((username) => username !== user!.username)}</td>
-                  <td>
-                    {game.winner
-                      ? game.winner === user!._id
-                        ? user!.username
-                        : game.usernames.filter((username) => username !== user!.username)
-                      : "tie"}
-                  </td>
-                </tr>
-              ))}
+            {typeIdsToTypes
+              ? games
+                  ?.filter((game) => typeIdsToTypes!.get(game.type)!.numPlayers > 1)
+                  .map((game) => (
+                    <tr>
+                      <td>{typeIdsToTypes!.get(game.type)!.name}</td>
+                      <td>{game.usernames.filter((username) => username !== user!.username)}</td>
+                      <td>
+                        {game.winner
+                          ? game.winner === user!._id
+                            ? user!.username
+                            : game.usernames.filter((username) => username !== user!.username)
+                          : "tie"}
+                      </td>
+                    </tr>
+                  ))
+              : null}
           </tbody>
         </Table>
+        {!games || !typeIdsToTypes ? <h4>Loading...</h4> : null}
+        {games &&
+        typeIdsToTypes &&
+        games.filter((game) => typeIdsToTypes!.get(game.type)!.numPlayers === 1).length === 0 ? (
+          <h4>No multiplayer games yet!</h4>
+        ) : null}
 
-        <h2>Single player</h2>
+        <h2 className="mt-3 mb-2">Single player</h2>
         <Table bordered hover>
           <thead>
             <tr>
@@ -78,16 +78,24 @@ export default function PastGamesPage() {
             </tr>
           </thead>
           <tbody>
-            {games
-              .filter((game) => typeIdsToTypes!.get(game.type)!.numPlayers === 1)
-              .map((game) => (
-                <tr>
-                  <td>{typeIdsToTypes!.get(game.type)!.name}</td>
-                  <td>{game.score}</td>
-                </tr>
-              ))}
+            {typeIdsToTypes
+              ? games
+                  ?.filter((game) => typeIdsToTypes!.get(game.type)!.numPlayers === 1)
+                  .map((game) => (
+                    <tr>
+                      <td>{typeIdsToTypes!.get(game.type)!.name}</td>
+                      <td>{game.score}</td>
+                    </tr>
+                  ))
+              : null}
           </tbody>
         </Table>
+        {!games || !typeIdsToTypes ? <h4>Loading...</h4> : null}
+        {games &&
+        typeIdsToTypes &&
+        games.filter((game) => typeIdsToTypes!.get(game.type)!.numPlayers === 1).length === 0 ? (
+          <h4>No single player games yet!</h4>
+        ) : null}
       </Container>
     </div>
   );

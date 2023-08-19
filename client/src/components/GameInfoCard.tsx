@@ -17,7 +17,9 @@ export default function GameInfoCard(props: { isAuthenticated: boolean; gameType
           {props.gameType.name}
         </Card.Title>
         <Card.Text>{props.gameType.description}</Card.Text>
-        <Card.Text>{`${props.gameType.numPlayers} Players`}</Card.Text>
+        <Card.Text>{`${props.gameType.numPlayers} Player${
+          props.gameType.numPlayers > 1 ? "s" : ""
+        }`}</Card.Text>
         {props.isAuthenticated ? (
           props.gameType.numPlayers > 1 ? (
             <>
