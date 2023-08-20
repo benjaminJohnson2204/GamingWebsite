@@ -3,15 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@testing-library/jest-dom": "^5.16.4",
-    "@testing-library/react": "^13.3.0",
-    "@testing-library/user-event": "^13.5.0",
-    "@types/jest": "^27.5.2",
-    "@types/node": "^16.11.47",
-    "@types/react": "^18.0.15",
-    "@types/react-dom": "^18.0.6",
     "formik": "^2.2.9",
-    "konva": "^9.2.0",
+    "konva": "^8.4.3",
     "mongoose": "^7.4.3",
     "react": "^18.2.0",
     "react-app": "^1.1.2",
@@ -48,5 +41,15 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^5.16.4",
+    "@testing-library/react": "^13.3.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@types/jest": "^27.5.2",
+    "@types/node": "^16.11.47",
+    "@types/react": "^18.0.15",
+    "@types/react-dom": "^18.0.6",
+    "@types/react-router-dom": "^5.3.3"
   }
 }

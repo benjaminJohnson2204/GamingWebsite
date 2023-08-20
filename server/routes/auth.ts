@@ -14,10 +14,16 @@ const ensureAuthenticated = (req: Request, res: Response, next: NextFunction) =>
   return res.status(401).json({ error: "Not authenticated" });
 };
 
+/**
+ * Gets the current user
+ */
 router.get("/user", ensureAuthenticated, (req: Request, res: Response) => {
   return res.status(200).json({ user: req.user });
 });
 
+/**
+ * Registers a new user
+ */
 router.post(
   "/register",
   async (req: Request, res: Response, next: (err: unknown, user?: IUser | null) => void) => {
@@ -47,6 +53,9 @@ router.post(
   }
 );
 
+/**
+ * Logs in
+ */
 router.post(
   "/login",
   passport.authenticate("local", { failureRedirect: "/auth/invalid" }),
@@ -56,7 +65,7 @@ router.post(
 );
 
 /**
- * Logout of site
+ * Logs the user out
  */
 router.post("/logout", (req: Request, res: Response) => {
   req.logout({}, (error) => {
@@ -69,8 +78,7 @@ router.post("/logout", (req: Request, res: Response) => {
 });
 
 /**
- * Delete account (mainly used for cleanup of tests)
- * Also logs out to avoid errors from being logged in to a nonexistent account
+ * Deletes account and logs the user out
  */
 router.delete("/delete", ensureAuthenticated, async (req: Request, res: Response) => {
   await User.deleteOne({ _id: (req.user as IUser)._id });

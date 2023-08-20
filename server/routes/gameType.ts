@@ -11,11 +11,17 @@ export interface IGameRequest {
   gameType: IGameType;
 }
 
+/**
+ * Gets all game types
+ */
 router.get("/all", async (req: Request, res: Response) => {
   const gameTypes = await GameType.find({});
   res.status(200).json(gameTypes);
 });
 
+/**
+ * Gets all requests (users waiting to play a random opponent) for all game types
+ */
 router.get("/requests", ensureAuthenticated, async (req: Request, res: Response) => {
   const requests = [];
   const gameTypes = await GameType.find({});
@@ -33,6 +39,9 @@ router.get("/requests", ensureAuthenticated, async (req: Request, res: Response)
   res.status(200).json(requests);
 });
 
+/**
+ * Retrieves a certain game type by ID
+ */
 router.get("/:gameType", async (req: Request, res: Response) => {
   const gameType: IGameType | null = await GameType.findOne({
     socketNamespace: req.params.gameType,

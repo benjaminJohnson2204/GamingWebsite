@@ -1,42 +1,28 @@
 # Gaming Website
 
-This is a website I created where users can play single-player and multi-player games. Users also become friends with each other and play private games with their friends, or play against random opponents. The website is hosted on Heroku at https://bens-gaming-website.herokuapp.com/.
+This is a website I created where users can play single-player and multi-player games. Users can become friends with each other and play private games with their friends, or play against random opponents. They can also view their game history.
+
+## Hosting
+
+The website is hosted on Render at https://gamingwebsite.onrender.com/.
 
 ## Tech Stack
 
-I programmed this website using MongoDB, Express, React, Node, TypeScript, and Socket.IO. I used Typescript for both the client and server code.
+I built this project using MongoDB, Express, React, Node, TypeScript, and Socket.IO. The back end is a server with an Express Rest API and a socket server. The front end is a React app. The front end is built into static files, which the back end then serves on the front end URL paths (e.g. `/`, `/login`, `/past-games`), and the front end uses React Router to route pages. The back end also serves its Rest API on paths within `/api`.
 
-## Running Instructions
+## How to Run
 
-To build the app, run
-
-```
-npm run build
-```
-
-To run the app, run
-
-```
-npm start
-```
-
-To run the tests, run
-
-```
-npm test
-```
-
-## Code Structure
-
-I divided the code into client code and server code.
-
-### Client
-
-All the client code is in the `client` directory. This directory is a React app, and I used React-Router for client-side routing. `client/src/components` contains components I created for the site, and `client/src/pages` contains the various site pages.
+1. Configure environment variables in a `.env` file within the project's root directory. See `.env.example` for the necessary variables and example values.
+1. Move to front end directory: `cd client`
+1. Install front end dependencies: `npm install`
+1. Build: `npm run build`
+1. Move back to project's root directory: `cd ..`
+1. Install back end dependencies: `npm install`
+1. Start the server: `npm run start`
 
 ### Database
 
-The `db` directory contains code for interfacing with my MongoDB database using Mongoose. `db/models` contains definitions for my database models. For each model, I define an interface (for Typescript typing) and a schema, then a model.
+The `db` directory contains code for interfacing with my MongoDB database using Mongoose. The `db/models` directory contains definitions for my database models. For each model, I define an interface (for Typescript typing) and a schema, then a model.
 
 In `db/models/document.ts`, the `IDocument` interface, which the model interfaces extend, contains the `_id` property since all MongoDB documents contain the `_id` field. Wherever this documentation says "ID", it refers to the `_id` field of a document.
 
@@ -128,4 +114,6 @@ The `server/gameHandlers` directory contains code for managing sockets for multi
 
 ### Tests
 
-The `tests` directory contains tests of the site's API routes. I used ChaiHttp to simulate HTTP requests, and MongoUnit to create a test database independent of my production database.
+The `tests` directory contains unit tests of my functions and API routes. I used MongoUnit to create a separate database for testing.
+
+You can run the tests with `npm run test`.

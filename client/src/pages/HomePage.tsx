@@ -31,7 +31,7 @@ export default function HomePage() {
           <Col xs={12} lg={6} xl={4}>
             <div className="gameplay-screenshot-container">
               <img
-                src="/Screenshots/Dots and Boxes.png"
+                src="/Screenshots/DotsAndBoxes.png"
                 alt="Playing Dots and Boxes"
                 width="400"
                 height="320"

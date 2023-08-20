@@ -78,7 +78,7 @@ export default function SiteHeader(props: { isAuthenticated: boolean; reloadFrie
                   show={dropdownVisible}
                   onClick={() => setDropdownVisible((visible) => !visible)}
                 >
-                  <NavDropdown.Item href="/past-games">Past Games</NavDropdown.Item>
+                  <NavDropdown.Item href="/past-games">Game History</NavDropdown.Item>
                   <NavDropdown.Item href="/friends">
                     Friends{" "}
                     {incomingFriendRequests > 0 && (

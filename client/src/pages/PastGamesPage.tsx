@@ -49,12 +49,12 @@ export default function PastGamesPage() {
                   .map((game) => (
                     <tr>
                       <td>{typeIdsToTypes!.get(game.type)!.name}</td>
-                      <td>{game.usernames.filter((username) => username !== user!.username)}</td>
+                      <td>{game.usernames.filter((username) => username !== user?.username)}</td>
                       <td>
                         {game.winner
                           ? game.winner === user!._id
                             ? user!.username
-                            : game.usernames.filter((username) => username !== user!.username)
+                            : game.usernames.filter((username) => username !== user?.username)
                           : "tie"}
                       </td>
                     </tr>
