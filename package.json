@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha --exit --require ts-node/register --require tests/test-preparer.ts 'tests/*.ts'",
-    "start": "node dist/server/index.js",
-    "build": "tsc && cd client && npm install && npm run build",
+    "start": "tsc && node dist/server/index.js",
+    "build": "cd client && npm install && npm run build",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write .",
     "prettier-check": "prettier --check ."
